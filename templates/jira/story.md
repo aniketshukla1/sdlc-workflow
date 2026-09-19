@@ -1,0 +1,26 @@
+# Jira Story template — paste into Jira description
+
+h2. Problem / Who
+As a [user], I want [goal] so that [value].
+
+h2. Success criteria (testable)
+- [ ] Criterion 1 (measurable, e.g. POST /login p95 < 300ms)
+- [ ] Criterion 2
+
+h2. Scope
+* In: ...
+* Out (non-goals): ...
+
+h2. Spec / Design
+- Spec: docs/specs/SPEC-PROJ-123.md (link after /spec approval)
+- API contract / screenshots / Figma: ...
+
+h2. Test plan
+- Unit: ...
+- Integration: ...
+- E2E/manual: ...
+
+h2. Rollout / Risks
+- Flag: ... | Migration: ... | Rollback: ...
+
+Branch: PROJ-123-short-summary (Jira key first, no feat/ prefix) | MR: [PROJ-123][Story] Summary | Commits: PROJ-123 [Story] feat: ...

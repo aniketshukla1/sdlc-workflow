@@ -1,0 +1,5 @@
+---
+description: Hard pre-merge review of a colleague MR against its Jira issue
+---
+
+Invoke the `mr-review` skill. Inputs required: MR (URL or branch `PROJ-123-summary`) + Jira key — if either is missing, ask first; no Jira link in the MR means Request changes immediately. Judge the MR against the Jira description AC-by-AC (traceability table with file:line + test + evidence), then five-axis hard review + evidence/safety verification. Verdict is exactly one of Approve / Request changes (blocking list with file:line + fix) / Comment. Never approve with open Required/Critical items or uncovered AC. Then publish to the MR via `./scripts/mr-publish.sh` (summary note + inline threads + approve/withheld state) and report the posted URLs.

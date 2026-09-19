@@ -1,0 +1,149 @@
+# GitLab CI example — copy to .gitlab-ci.yml in your project and adjust images/vars.
+# Stages mirror skill gates: conventions → lint → typecheck → test → build → e2e → audit → deploy.
+# Coverage + contract gates: backend --cov-fail-under=80, frontend vitest --coverage thresholds,
+# openapi.json snapshot attached for contract review. Trunk-based: every branch runs full pipeline.
+
+stages: [conventions, lint, typecheck, test, build, e2e, audit, deploy]
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  DOCKER_HOST: tcp://docker:2375/
+
+cache:
+  paths: [.cache/pip, frontend/node_modules/]
+
+conventions: # Jira branch/commit/MR naming — PROJ-123-summary + PROJ-123 [Type] type: ... + [PROJ-123][Type] ...
+  stage: conventions
+  image: alpine:3.20
+  script:
+    - apk add --no-cache git bash
+    - bash scripts/check-jira-conventions.sh
+  rules: [{if: $CI_MERGE_REQUEST_IID}, {if: $CI_COMMIT_BRANCH}]
+
+backend-lint:
+  stage: lint
+  image: python:3.12-slim
+  script: [pip install ruff, ruff check backend/]
+
+backend-typecheck:
+  stage: typecheck
+  image: python:3.12-slim
+  script: [pip install mypy -r backend/requirements.txt, mypy backend/]
+
+backend-test:
+  stage: test
+  image: python:3.12-slim
+  services: [postgres:16-alpine, redis:7-alpine]
+  script: [pip install -r backend/requirements.txt -r backend/requirements-dev.txt, pytest -q --cov=backend --cov-fail-under=80 --junitxml=junit-backend.xml]
+  artifacts: {when: always, reports: {junit: junit-backend.xml, coverage_report: {coverage_format: cobertura, path: coverage.xml}}, paths: [coverage.xml]}
+
+mutation: # kills weak tests on high-risk backend modules: zero SURVIVED mutants allowed (mutmut 3.x)
+  stage: test
+  image: python:3.12-slim
+  services: [postgres:16-alpine, redis:7-alpine] # match whatever your suite needs (mutmut runs pytest internally)
+  script:
+    - pip install -r backend/requirements.txt -r backend/requirements-dev.txt mutmut
+    - mutmut run # scoped by pyproject.toml [tool.mutmut] only_mutate (e.g. backend/auth/*); incremental
+    - mutmut export-cicd-stats # writes mutants/mutmut-cicd-stats.json
+    - python3 -c "import json,sys; s=json.load(open('mutants/mutmut-cicd-stats.json')); print(s); sys.exit(1 if s.get('survived',1)>0 else 0)"
+  artifacts: {when: always, paths: [mutants/]}
+  rules: [{if: $CI_MERGE_REQUEST_IID}]
+
+frontend-lint-typecheck:
+  stage: lint
+  image: node:20-slim
+  script: [cd frontend, npm ci, npm run lint, npx tsc --noEmit]
+
+frontend-test: # coverage thresholds live in frontend/vitest.config.ts (lines ≥80% on touched code)
+  stage: test
+  image: node:20-slim
+  script: [cd frontend, npm ci, npm run test -- --coverage]
+  artifacts: {when: always, paths: [frontend/coverage/]}
+
+openapi-snapshot: # contract evidence: generated schema attached to MR so reviewers see API drift
+  stage: test
+  image: python:3.12-slim
+  script:
+    - pip install -r backend/requirements.txt
+    - python -c "from backend.main import app; import json; open('openapi.json','w').write(json.dumps(app.openapi(), indent=2))" # adjust import to your FastAPI app
+  artifacts: {paths: [openapi.json]}
+  rules: [{if: $CI_MERGE_REQUEST_IID}]
+
+frontend-build: # bundle budget: keep an eye on dist size; wire real budgets (LCP/CLS) via Lighthouse CI when needed
+  stage: build
+  image: node:20-slim
+  script: [cd frontend, npm ci, npm run build, du -sh dist]
+
+storybook: # broken stories fail the build — the catalog is part of the product (see docs/storybook.md)
+  stage: build
+  image: node:20-slim
+  script: [cd frontend, npm ci, npm run build-storybook]
+  rules: [{if: $CI_MERGE_REQUEST_IID, changes: [frontend/**/*]}]
+
+e2e: # evidence for UI-only verification: report + screenshots/video attached to MR, no code reading needed
+  stage: e2e
+  image: mcr.microsoft.com/playwright:v1.49.0-noble
+  script: [cd frontend, npm ci, npx playwright install --with-deps, npm run test:e2e]
+  artifacts: {when: always, paths: [frontend/playwright-report/, frontend/test-results/]}
+  rules: [{if: $CI_MERGE_REQUEST_IID}] # run on MRs; add main deploys as needed
+
+lighthouse: # lab perf budgets (LCP/CLS) on public routes — config: frontend/lighthouserc.cjs (from templates/frontend/lighthouserc.cjs.example; .cjs because Vite projects are ESM)
+  stage: e2e
+  image: node:20-slim
+  script:
+    - apt-get update -qq && apt-get install -y -qq chromium # chrome-launcher needs a real browser
+    - export CHROME_PATH=$(which chromium)
+    - cd frontend && npm ci && npm run build && npx --yes @lhci/cli autorun --config=./lighthouserc.cjs
+  artifacts: {when: always, paths: [frontend/.lighthouserc/]}
+  rules: [{if: $CI_MERGE_REQUEST_IID}]
+
+storybook-tests: # stories as tests: smoke + play functions + axe per story (needs a11y addon — see docs/storybook.md)
+  stage: e2e
+  image: mcr.microsoft.com/playwright:v1.49.0-noble
+  script:
+    - cd frontend && npm ci && npx playwright install --with-deps && npm run build-storybook
+    - npx --yes http-server storybook-static -p 6006 --silent &
+    - npx --yes wait-on http://127.0.0.1:6006
+    - npx --yes -p @storybook/test-runner test-storybook --url http://127.0.0.1:6006 --maxWorkers=2
+  rules: [{if: $CI_MERGE_REQUEST_IID, changes: [frontend/**/*]}]
+
+migration-check: # reversibility proof: upgrade to head, full downgrade, upgrade again — on a scratch DB (see docs/migration-safety.md)
+  stage: test
+  image: python:3.12-slim
+  services: [postgres:16-alpine]
+  variables:
+    POSTGRES_DB: app_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    DATABASE_URL: postgresql://postgres:postgres@postgres:5432/app_test # adjust to your settings module + env.py wiring
+  script:
+    - pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+    - cd backend && alembic upgrade head && alembic downgrade base && alembic upgrade head # adjust if alembic lives elsewhere
+  rules: [{if: $CI_MERGE_REQUEST_IID}]
+
+secrets-scan: # server-side backstop — pre-commit grep is bypassable with --no-verify
+  stage: audit
+  image: zricethezav/gitleaks:latest # pin to a version (e.g. v8.x) in real projects
+  script: [gitleaks detect --source . -v]
+  rules: [{if: $CI_MERGE_REQUEST_IID}, {if: $CI_COMMIT_BRANCH == "main"}]
+
+audit:
+  stage: audit
+  image: python:3.12-slim
+  script:
+    - pip install pip-audit
+    - pip-audit -r backend/requirements.txt
+    - cd frontend && npm audit --audit-level=high
+  allow_failure: false
+
+compose-smoke:
+  stage: build
+  image: docker:27
+  services: [docker:27-dind]
+  script: [docker compose up -d --build, sleep 15, docker compose ps, curl -f http://localhost:8000/healthz, docker compose down]
+
+deploy-staging: # extend to review/canary per shipping-and-launch; keep flag-gated rollout in release job
+  stage: deploy
+  script: [echo "deploy $CI_COMMIT_SHA to staging (add your helm/k8s/compose deploy here)"]
+  environment: {name: staging}
+  rules: [{if: $CI_COMMIT_BRANCH == "main"}]

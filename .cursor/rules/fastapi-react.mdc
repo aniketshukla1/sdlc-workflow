@@ -1,0 +1,11 @@
+---
+description: FastAPI + React + Tailwind + shadcn stack rules
+alwaysApply: false
+globs: ["backend/**/*.py", "frontend/**/*.{ts,tsx}", "docker-compose*.yml"]
+---
+
+- Backend (`backend/`): FastAPI + Pydantic v2 + SQLAlchemy/Alembic. Validate at boundary. Commands: `pytest -q`, `ruff check .`, `mypy backend/`.
+- Frontend (`frontend/`): React + Tailwind + shadcn/ui. Accessible (keyboard, contrast 4.5:1, focus, labelled errors). Commands: `npm run dev/test/lint/build`, `tsc --noEmit`.
+- Local: `docker compose up --build`. Never commit `.env`, `node_modules/`, `dist/`, `.next/`, `__pycache__/`.
+- API errors: `{error:{code,message}}`. No breaking contract change without major + migration note.
+- Cite official docs for framework decisions (`source-driven-development`).

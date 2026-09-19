@@ -1,0 +1,24 @@
+# Plan: PROJ-123 — [Feature]
+
+Spec: `docs/specs/SPEC-PROJ-123.md` · Jira: [PROJ-123](<URL>) · Type: Story · Branch: `PROJ-123-short-summary`
+
+## Build order + dependencies
+1. [ ] Slice 1 — [description] (no deps)
+2. [ ] Slice 2 — [description] (depends on 1)
+3. [ ] Slice 3 — [description] (parallelizable with 2)
+
+Risks: [risk → mitigation]
+
+## Tasks (TDD-first: tests are written BEFORE implementation, red shown BEFORE green)
+- [ ] Task 1: [description] (covers AC-1)
+  - Tests first: [test files to CREATE first, e.g. `backend/tests/test_x.py::test_y`]
+  - Red evidence: [failing output before fix, e.g. `FAILED test_y - assert ...`]
+  - Acceptance: [must be true]
+  - Verify: [command, e.g. `pytest backend/tests/test_x.py -q` + coverage on touched lines]
+  - Files: [implementation paths]
+- [ ] Task 2: ...
+
+## Verification checkpoints
+- After slice N: red shown → green shown + no new uncovered lines on touched code
+- Pre-push (local): full local suite + lint + typecheck + coverage bars green + `/review`
+- Post-push: pipeline green (conventions → lint → typecheck → test → build → e2e → audit)

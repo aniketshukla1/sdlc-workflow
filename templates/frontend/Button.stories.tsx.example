@@ -1,0 +1,41 @@
+// Storybook story pattern — copy next to your component (e.g. Button.stories.tsx)
+// and adapt props to your shadcn Button. CSF3, works on Storybook 8+.
+// States mirror the AC-2 pattern: default, loading, disabled, destructive.
+import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from '@storybook/test';
+import { Button } from './button';
+
+const meta = {
+  title: 'UI/Button',
+  component: Button,
+  args: { onClick: fn() },
+  parameters: { layout: 'centered' },
+} satisfies Meta<typeof Button>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: { children: 'Save changes' },
+};
+
+export const Loading: Story = {
+  args: { children: 'Saving…', disabled: true },
+};
+
+export const Disabled: Story = {
+  args: { children: 'Save changes', disabled: true },
+};
+
+export const Destructive: Story = {
+  args: { children: 'Delete account', variant: 'destructive' },
+};
+
+export const ClickCallsHandler: Story = {
+  args: { children: 'Save changes' },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Save changes' }));
+    await expect(args.onClick).toHaveBeenCalledTimes(1);
+  },
+};

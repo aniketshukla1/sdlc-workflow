@@ -1,0 +1,12 @@
+---
+description: Jira + GitLab trunk-based conventions
+alwaysApply: true
+---
+
+- One Jira issue = one branch = one worktree = one MR.
+- Branch: `PROJ-123-short-summary` off `main` (Jira key first, no feat/ prefix, kebab-case). Max 1–3 days lifetime.
+- Commits: `PROJ-123 [Type] <conventional-type>: ...` (e.g. `PROJ-123 [Story] feat: ...`, `PROJ-123 [Bug] fix: ...`). [Type] = Jira issue type. Atomic, ~100 lines, tests green before commit.
+- MR title: `[PROJ-123][Type] Summary` + label `Jira::Story|Bug|Task`. Body uses GitLab MR template (Jira link + type, spec section, tests, checklist, rollback).
+- Jira transitions: Ready → In Progress (branch created) → In Review (MR open) → Done (merged + deployed + monitors green).
+- Parallel work: `git worktree add ../<repo>-<KEY> <branch>` per issue; remove after merge.
+- Never force-push shared branches. Squash-merge, delete branch.

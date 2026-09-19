@@ -1,0 +1,34 @@
+# CONSTRAINTS.md (example — copy to CONSTRAINTS.md per project and tailor once)
+
+> Generated via `/constraints` (`constraint-driven-development`). Decide once, enforce everywhere. Cheap checks run early (pre-commit/CI lint), expensive checks run late (e2e/perf). Agents must not silence checks or skip tests to get green.
+
+## Change sizing
+- Max ~100 lines per commit/MR slice; ~300 acceptable for one logical change; >1000 must split.
+- One logical change per commit (`feat`/`fix`/`refactor`/`test`/`docs`/`chore`). No formatting+behavior mixes.
+
+## Test bar (spec-driven + test-driven-development — tests BEFORE code, always)
+- Spec first: every success criterion has an AC-ID mapped to ≥1 test in the spec's Acceptance → Test map. Unmapped AC blocks `/plan`.
+- TDD per task: write the failing test FIRST, show red output, then implement to green, then refactor. Red evidence is required in the task/MR — "tests pass" without a prior red is not TDD.
+- Pyramid ~80% unit / 15% integration / 5% e2e. Backend: `pytest -q` + coverage ≥80% on touched modules + ZERO new uncovered lines on touched code. Frontend: `vitest --coverage` (thresholds in `frontend/vitest.config.ts`, lines ≥80% on touched) + key flows in `playwright`.
+- UI MRs: `playwright` e2e for happy + one error path + `@axe-core/playwright` zero serious/critical on changed flows.
+- API changes: OpenAPI snapshot diff reviewed in MR (`openapi.json`); breaking change → major + migration note.
+- Bug fix must add regression guard. No deleting/skipping/quarantining tests without human approval + follow-up Jira (flaky → quarantine + `flaky`-labelled issue with owner + expiry per `docs/flaky-test-triage.md`, never silent skip).
+- Mutation testing (`mutmut`, backend high-risk modules listed in `pyproject.toml [tool.mutmut] only_mutate`): zero SURVIVED mutants. Run locally before publish; enforced in CI (`mutation` job fails on `survived > 0` in `mutants/mutmut-cicd-stats.json`).
+
+## Static gates (must pass pre-commit + CI)
+- Backend: `ruff check .` + `mypy backend/` clean. Frontend: `eslint` + `tsc --noEmit` clean. `prettier` formatted.
+- No secrets in diff (`gitleaks` or `git diff --staged | grep -iE 'password|secret|api_key|token'`). `.env` never committed.
+- Deps: `pip-audit` / `npm audit` — zero critical/high on merge.
+
+## API / UI contracts
+- API: contract-first (OpenAPI via FastAPI), Pydantic validation at boundary, error shape `{error:{code,message}}`, no breaking change without major + migration note (Hyrum's Law).
+- UI: WCAG 2.1 AA (contrast 4.5:1, keyboard nav, focus management, labelled errors). Tests query by role; changed flows carry Playwright screenshot baselines (1280px + 390px, light + dark) + axe sweep on every touched route. Core Web Vitals: LCP <2.5s, INP <200ms, CLS <0.1 — LCP/CLS enforced by the LHCI `lighthouse` job on public routes (INP is field-measured, not lab-gated).
+
+## Observability / ship
+- New critical path: structured logs + RED metrics + error reporting. Health `GET /healthz` 200.
+- Rollback path documented in MR. Feature flags: owner + expiry, cleanup ≤2 weeks, no nesting.
+
+## Boundaries
+- Always: run tests before commit; validate inputs; link Jira + spec in MR.
+- Ask first: DB migrations, new deps, CI/CD changes, public API changes.
+- Never: commit secrets; edit vendor/build output; force-push shared branches; refactor untested legacy without characterization tests.

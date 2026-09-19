@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "UTC",
+  "schedule": ["before 6am on Monday"],
+  "labels": ["deps"],
+  "reviewers": ["your-devops-lead"],
+  "branchPrefix": "renovate/",
+  "commitMessagePrefix": "chore(deps):",
+  "lockFileMaintenance": { "enabled": true, "automerge": true },
+  "vulnerabilityAlerts": { "labels": ["security"], "automerge": false },
+  "packageRules": [
+    {
+      "description": "Auto-merge patch updates once the pipeline is green (CODEOWNERS approval still applies)",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group npm minor+patch into one MR for human approval",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "npm non-major"
+    },
+    {
+      "description": "Group Python minor+patch into one MR for human approval",
+      "matchManagers": ["pip_requirements"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "python non-major"
+    },
+    {
+      "description": "Never automerge majors — they can break contracts",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
+}

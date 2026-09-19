@@ -1,0 +1,29 @@
+# CODEOWNERS template — copy to CODEOWNERS at your project ROOT, then replace every handle.
+# GitLab: Settings → Merge requests → enable "Require approval from code owners".
+# Rules: last matching pattern wins, so keep specific paths AFTER generic ones.
+# An MR touching a listed path cannot merge without its owner's approval —
+# this is the human backstop agents can't replace (auth, migrations, billing, pipeline).
+
+# Fallback owner for everything (your tech lead)
+* @your-team-lead
+
+# AuthN/Z + permissions — mistakes here are breaches, not bugs
+backend/auth/ @security-lead @backend-lead
+backend/**/permissions* @security-lead @backend-lead
+
+# Database migrations — irreversible in prod, needs senior eyes
+backend/migrations/ @backend-lead
+backend/alembic/ @backend-lead
+
+# Payments / billing — money movement, dual approval
+backend/billing/ @backend-lead @product-owner
+frontend/**/payments/ @frontend-lead @backend-lead
+
+# Pipeline + infra + supply chain — controls every gate in this workflow
+.gitlab-ci.yml @devops-lead @backend-lead
+docker-compose*.yml Dockerfile* @devops-lead @backend-lead
+frontend/package.json backend/requirements*.txt @devops-lead
+
+# The workflow + ownership itself
+AGENTS.md CONSTRAINTS.md SDLC.md @your-team-lead
+CODEOWNERS @your-team-lead

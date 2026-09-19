@@ -1,0 +1,57 @@
+# Spec: [Feature] (Jira PROJ-123)
+
+> Produced by `/spec` (`spec-driven-development`). Human-approved before `/plan`. Keep living — update on scope/decision change. Delete or archive after merge if repo doesn't keep specs long-term.
+
+## Objective
+[What + why. Users, user stories, success metrics.]
+
+## Tech Stack
+- Backend: FastAPI 0.1xx, Python 3.12, Pydantic v2, SQLAlchemy 2.x/Alembic, pytest
+- Frontend: React 18, Tailwind, shadcn/ui, vitest, playwright
+- Local: `docker compose up --build`
+
+## Commands
+```
+Dev: docker compose up --build
+Backend test: pytest -q | lint: ruff check . | types: mypy backend/
+Frontend dev: cd frontend && npm run dev | test: npm run test | lint: npm run lint | types: npx tsc --noEmit | e2e: npm run test:e2e
+```
+
+## Project Structure
+```
+backend/        → FastAPI app (routers/, services/, models/, schemas/)
+frontend/       → React (components/ui shadcn, hooks/, lib/, app/ or src/)
+docs/specs/     → This spec + capability maps
+tasks/          → plan + todo for this Jira key
+tests/e2e       → playwright specs
+```
+
+## Code Style
+[Naming, formatting, one real snippet of good output for backend + frontend.]
+
+## Testing Strategy
+[Framework, locations, pyramid split, coverage bar ≥80% touched, which levels for which concerns.]
+
+## Boundaries
+- Always: [tests before commit, validate inputs, link Jira+spec in MR]
+- Ask first: [migrations, new deps, CI changes, public API changes]
+- Never: [secrets, vendor/build output, force-push, untested legacy refactor]
+
+## Threat model (REQUIRED for auth / personal data / payments / public API changes — else N/A with reason)
+- Assets: [what must not leak/break]
+- Trust boundaries: [where untrusted input crosses — routes, webhooks, file uploads]
+- Mitigations: [authZ checks, validation, rate limits, audit logging per boundary]
+
+## Success Criteria
+- [ ] AC-1: Testable condition 1 (e.g. POST /items 201 + persisted, p95 < 300ms)
+- [ ] AC-2: Testable condition 2 (e.g. empty-state UI keyboard-navigable, axe clean)
+
+## Acceptance → Test map (TDD anchor — every AC gets ≥1 failing test BEFORE code)
+| AC | Test file(s) | Level |
+|---|---|---|
+| AC-1 | `backend/tests/test_<area>.py::test_<case>` | unit / integration |
+| AC-2 | `frontend/src/.../*.test.tsx` + `e2e/<flow>.spec.ts` | unit / e2e |
+<!-- /plan copies this table into tasks and turns each row into test-first tasks. Unmapped AC = spec not ready. -->
+
+## Open Questions
+- [ ] ...

@@ -1,0 +1,8 @@
+---
+description: Ask clarifying questions before acting when unsure
+alwaysApply: true
+---
+
+- If confidence is <~95% on intent, scope, acceptance, or Jira key/type, STOP and ask before spec/plan/code. Follow `docs/clarification-protocol.md` (interview-me, one question at a time).
+- Surface `ASSUMPTIONS I'M MAKING` explicitly; record answers in the spec + Jira. Get explicit approval before leaving Define/Plan.
+- Never guess on scope, acceptance, auth/security, migrations, public APIs, deletions, or unfamiliar legacy code. Never weaken checks to avoid asking.

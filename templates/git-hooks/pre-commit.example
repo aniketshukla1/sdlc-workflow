@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Pre-commit example — install: cp templates/git-hooks/pre-commit.example .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Fast local gates so CI rarely surprises you. Server-side truth is still the pipeline.
+set -euo pipefail
+
+# 1. Block secrets + .env
+if git diff --cached --name-only | grep -qE '^\.env(\.|$)'; then
+  echo "BLOCKED: never commit .env files"; exit 1
+fi
+if git diff --cached | grep -qiE 'password|secret|api_key|private_key'; then
+  echo "BLOCKED: possible secret in staged diff — remove it"; exit 1
+fi
+
+# 2. Backend lint on staged Python (if ruff installed)
+if git diff --cached --name-only | grep -q '\.py$'; then
+  if command -v ruff >/dev/null 2>&1; then ruff check backend/ 2>/dev/null || ruff check .; fi
+fi
+
+# 3. Branch naming (Jira key first, no feat/ prefix)
+BRANCH="$(git branch --show-current)"
+if [[ ! "$BRANCH" =~ ^[A-Z][A-Z0-9]+-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ && "$BRANCH" != "main" ]]; then
+  echo "WARNING: branch '$BRANCH' breaks PROJ-123-summary convention (see scripts/check-jira-conventions.sh)"
+fi
+
+echo "pre-commit OK (fast checks). Full gates: pytest/vitest locally, pipeline after publish."

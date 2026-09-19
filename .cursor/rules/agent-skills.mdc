@@ -1,0 +1,11 @@
+---
+description: Use agent-skills workflows from .cursor/skills and .opencode/skills
+alwaysApply: true
+---
+
+Before non-trivial technical work:
+
+1. Route via `AGENTS.md` Intent → skill mapping (fallback: `.cursor/skills/using-agent-skills/SKILL.md`).
+2. Read and follow `.cursor/skills/<name>/SKILL.md` for the matched skill. Load `references/` checklist when the skill links it.
+3. Never skip spec/plan/test/review steps a skill requires. Cite verification evidence.
+4. Prefer project skills over guessing; user does not need to say "read skill" each time.
