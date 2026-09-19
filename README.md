@@ -93,6 +93,10 @@ cp /path/to/sdlc-workflow/CONSTRAINTS.md.example /path/to/my-project/CONSTRAINTS
 # Install pre-commit: cp templates/git-hooks/pre-commit.example .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 # 4. Run the lifecycle (identical in Cursor and OpenCode)
+# Fast path (recommended): paste a Jira key OR summary+description → /autopilot drives
+# new-issue → /spec → /plan → /build → /test → ui-verify → publish → GitLab MR in gate order
+/autopilot     # gated: still pauses for spec approval, plan approval, and your browser UI pass
+# Manual path (same gates, you invoke each step):
 /constraints   # once per project → writes CONSTRAINTS.md
 ./scripts/new-issue.sh PROJ-123 Story short-summary  # branch PROJ-123-summary + worktree (LOCAL ONLY)
 /spec          # per Jira Epic/Story → writes SPEC-<KEY>.md, link in Jira (asks questions first)

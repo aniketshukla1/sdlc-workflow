@@ -1,6 +1,29 @@
 # Jira ↔ GitLab integration (Smart commits + linking)
 
-Goal: every branch/MR/commit moves the right Jira issue with zero manual copy-paste.
+Goal: every branch/MR/commit moves the right Jira issue with zero manual copy-paste. The `/autopilot` (`jira-autopilot`) skill is the deterministic path — it performs this whole page in gate order.
+
+## 0. Autopilot access (MCP first, tokens as fallback)
+
+Order the agent tries: (1) Jira/GitLab MCP tools when configured, (2) REST with env tokens, (3) STOP with the export block when creds are missing. Never paste token values into specs, Jira comments, MR bodies, or chat.
+
+```bash
+export JIRA_HOST="https://<your-domain>.atlassian.net"
+export JIRA_EMAIL="you@example.com"
+export JIRA_API_TOKEN="<jira-api-token>"   # Server/DC: JIRA_TOKEN instead
+export GITLAB_HOST="https://gitlab.com"    # or self-hosted URL
+export GITLAB_TOKEN="<gitlab-token api scope>"
+```
+
+| Var | Used for | Scope / notes |
+|---|---|---|
+| `JIRA_HOST` | REST base URL | `https://<domain>.atlassian.net` (Cloud) or Server/DC base |
+| `JIRA_EMAIL` | Cloud auth user | Atlassian account email (Cloud only) |
+| `JIRA_API_TOKEN` | Cloud auth | `api.atlassian.com` API token (Cloud) |
+| `JIRA_TOKEN` | Server/DC auth | Personal access token alternative to the pair above |
+| `GITLAB_HOST` | API + MR URLs | Default `https://gitlab.com` |
+| `GITLAB_TOKEN` | MR open/comment/approve | `api` scope; reviewer identity (never the MR author's token for approve) |
+
+MR open order inside autopilot Phase 9: MCP → `glab mr create` → `curl` REST (`POST /projects/:id/merge_requests`). Jira fetch/create: MCP → REST (`GET/POST .../rest/api/3/issue`). See `skills/jira-autopilot/SKILL.md` Phase 1 for the exact contract.
 
 ## 1. Connect (one time, admin)
 

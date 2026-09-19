@@ -2,6 +2,8 @@
 
 Source of truth for "what happens when". Each phase lists: **goal, skills, command, Jira state, GitLab action, artifacts, exit gate**. Advance only when the gate is green.
 
+> Orchestrator: `/autopilot` (`jira-autopilot` skill) drives Phases 0→5 end to end for one Jira issue — paste a key or a summary+description, it clarifies, then calls `/spec` → `/plan` → `/build` → `/test` → `ui-verify.sh` → `publish.sh` → MR in gate order with human approvals at spec, plan, and browser-UI pass. `scripts/` are its executors, never standalone shortcuts.
+
 Stack assumptions: FastAPI (`backend/`, `pytest`), React+Tailwind+shadcn (`frontend/`, `vitest`/`playwright`), `docker-compose.yml` for local. Adjust commands in `CONSTRAINTS.md` per repo.
 
 ---

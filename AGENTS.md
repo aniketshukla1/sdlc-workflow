@@ -21,6 +21,7 @@ This project uses skills synced from `addyosmani/agent-skills`:
 
 ## Intent → skill mapping
 
+- Jira paste / Jira-to-MR end-to-end / new Jira issue from summary → `jira-autopilot` (`/autopilot`) — orchestrates intake→branch→spec→plan→build→verify→publish→MR; `scripts/` are executors it calls, never replacements.
 - Vague ask / "what should we build" → `interview-me`, then `idea-refine`
 - New feature / Epic / significant change → `spec-driven-development` + `constraint-driven-development` (`/spec`, `/constraints`)
 - Spec exists, need tasks → `planning-and-task-breakdown` (`/plan`)
@@ -49,5 +50,5 @@ This project uses skills synced from `addyosmani/agent-skills`:
 
 1. Detect intent → if unsure (<~95%), clarify FIRST per `docs/clarification-protocol.md`. Then load matching skill(s) BEFORE acting.
 2. Follow the skill workflow exactly, including its Verification checklist.
-3. For Jira-linked work: confirm Jira key + Jira type ([Story|Bug|Task|Sub-task|Epic]), branch `PROJ-123-summary`, and spec/plan files before coding.
-4. After changes: structured summary (touched / deliberately-untouched / concerns) + test evidence + local preview URL + UI test steps + Jira status suggestion. Human verifies in UI on the SAME local branch, not code. Never push to origin before that UI pass — first push is `scripts/publish.sh` only.
+3. For Jira-linked work: confirm Jira key + Jira type ([Story|Bug|Task|Sub-task|Epic]), branch `PROJ-123-summary`, and spec/plan files before coding. Prefer `/autopilot` — it detects pasted key vs summary+description, clarifies to ~95%, and calls `scripts/` executors in gate order.
+4. After changes: structured summary (touched / deliberately-untouched / concerns) + test evidence + local preview URL + UI test steps + Jira status suggestion. Human verifies in UI on the SAME local branch, not code. Never push to origin before that UI pass — first push is `scripts/publish.sh` only (via autopilot Phase 9, or manually).
