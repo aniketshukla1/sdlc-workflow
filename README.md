@@ -156,7 +156,7 @@ Upstream engineering skills come from `addyosmani/agent-skills`; this pack adds
 | Kiro | `.kiro/skills/` | auto-discovered | Follows `AGENTS.md` |
 | Windsurf | via `.windsurfrules` | `commands/*.toml` reference | Keep global rules to 2–3 skills |
 | Antigravity | `./skills/` + `plugin.json` | `commands/*.toml` | `agy plugin install <repo>` |
-| Command Code / skills CLI / others | `./skills/` directly | `AGENTS.md` | `npx/cmd skills add <repo>` — plain Markdown |
+| Command Code / skills CLI / others | `./skills/` directly | `AGENTS.md` | `npx skills add aniketshukla1/sdlc-workflow` — plain Markdown, verified live |
 
 `./scripts/install-skills.sh --all` syncs upstream skills + this pack into all
 seven checkout skill dirs (all gitignored — wrappers and manifests are committed).
