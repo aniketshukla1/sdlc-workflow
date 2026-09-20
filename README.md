@@ -113,6 +113,13 @@ flowchart LR
 Upstream engineering skills come from `addyosmani/agent-skills`; this pack adds `jira-autopilot` + `mr-review`.
 Full step-by-step guide (prerequisites, verify, troubleshooting): [`docs/installation.md`](docs/installation.md).
 
+Pick **ONE** of the three options below. Option 1 needs no clone (runs from anywhere);
+options 2–3 run from a local clone, so start with:
+
+```bash
+git clone https://github.com/aniketshukla1/sdlc-workflow.git && cd sdlc-workflow
+```
+
 1. **Skills only, 1 minute** — the two skills in your current agent, nothing else:
    ```bash
    npx skills add aniketshukla1/sdlc-workflow

@@ -13,6 +13,11 @@ Skills without executors can advise but can't run the flow. Executors without sk
 
 - `git` and `bash` (macOS/Linux; Windows via Git Bash or WSL).
 - For the one-line installs: `node` + `npx` ([nodejs.org](https://nodejs.org/)).
+- Paths B and C below run scripts **from a local clone** of this repo —
+  Path A does not need one:
+  ```bash
+  git clone https://github.com/aniketshukla1/sdlc-workflow.git && cd sdlc-workflow
+  ```
 - No Jira/GitLab tokens needed at install time — `/autopilot` asks for them on first run (see [`jira-gitlab-integration.md`](jira-gitlab-integration.md)).
 
 ## Path A — fastest: skills CLI (skills only, 1 minute)
@@ -42,7 +47,7 @@ Then **restart your agent session** so it discovers the new skills. Limitation: 
 
 ## Path B — full workflow installer (recommended for real projects)
 
-`scripts/install-workflow.sh` (in this repo) installs skills **and** executors. Run it with no flags and it interviews you:
+Needs the clone above. `scripts/install-workflow.sh` installs skills **and** executors. Run it with no flags and it interviews you:
 
 ```bash
 ./scripts/install-workflow.sh
