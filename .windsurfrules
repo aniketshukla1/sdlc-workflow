@@ -1,0 +1,7 @@
+# .windsurfrules — SDLC workflow (Jira + GitLab, trunk-based)
+
+Router: `AGENTS.md` is the source of truth. Skills: `skills/jira-autopilot/SKILL.md`, `skills/mr-review/SKILL.md` (run `./scripts/install-skills.sh --all` for upstream engineering skills). Commands: `commands/*.toml` (autopilot, spec, planning, build, test, review, mr-review, ship).
+
+- Jira work: paste key (`PROJ-123`) or summary+description → clarify to ~95% (≤3 questions/round, assumptions listed) → branch `PROJ-123-slug` (key first, no feat/ prefix) → spec `docs/specs/SPEC-<KEY>.md` (approval gate) → plan `tasks/<KEY>-plan.md` (approval gate) → build TDD locally (commits `KEY [Type] <feat|fix|...>: ...`) → `./scripts/ui-verify.sh` (human browser pass = push gate) → `./scripts/publish.sh` (first push) → MR `[KEY][Type]` + Jira label.
+- Reviews: Jira-AC traceability first, then five-axis gates; verdict is Approve / Request changes / Comment.
+- Never push before the UI pass. Never weaken tests/linters to get green. Never emit secrets into specs/Jira/MR.

@@ -1,0 +1,28 @@
+{
+  "name": "sdlc-workflow",
+  "version": "1.0.0",
+  "description": "Reusable SDLC workflow: Jira-to-GitLab autopilot, trunk-based conventions, and review gates for AI coding agents.",
+  "author": {
+    "name": "aniketshukla1"
+  },
+  "homepage": "https://github.com/aniketshukla1/sdlc-workflow",
+  "repository": "https://github.com/aniketshukla1/sdlc-workflow",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SDLC Workflow",
+    "shortDescription": "Jira-to-MR autopilot: clarify, branch, spec, plan, build, verify, publish.",
+    "longDescription": "SDLC Workflow packs a jira-autopilot orchestrator skill plus an mr-review gate, Jira/GitLab trunk conventions, and lifecycle command wrappers for Claude, Codex, Gemini, Cursor, OpenCode, Copilot, Kiro, Windsurf, and Antigravity. Upstream engineering skills (spec, plan, TDD, review, ship) install separately via addyosmani/agent-skills.",
+    "developerName": "aniketshukla1",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Take this Jira issue end to end: clarify, branch, spec, plan, build, verify, publish, open the MR",
+      "Review this MR against its Jira acceptance criteria"
+    ]
+  }
+}

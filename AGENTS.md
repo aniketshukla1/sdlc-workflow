@@ -3,8 +3,8 @@
 > Copy this file to your project root. It is the system prompt that forces skill-driven execution in both Cursor and OpenCode. Do NOT copy upstream `addyosmani/agent-skills` root AGENTS.md — that configures the skills repo itself.
 
 This project uses skills synced from `addyosmani/agent-skills`:
-- Cursor: `.cursor/skills/<name>/SKILL.md` (run `scripts/install-skills.sh`)
-- OpenCode: `.opencode/skills/<name>/SKILL.md` (same script installs both)
+- Upstream skills + this pack's `skills/` (jira-autopilot, mr-review) sync via `scripts/install-skills.sh` into every host dir: `.cursor/skills/`, `.opencode/skills/`, `.claude/skills/`, `.agents/skills/`, `.github/skills/`, `.kiro/skills/`, `.gemini/skills/` (all gitignored; Codex/Command Code/skills-CLI read `./skills/` in place).
+- Commands (committed wrappers, same workflow per host): `.opencode/commands/`, `.claude/commands/`, `.gemini/commands/*.toml`, `commands/*.toml` (Antigravity). Routers: `.cursor/rules/`, `.github/copilot-instructions.md`, `.windsurfrules`, `CLAUDE.md`, `GEMINI.md`.
 - Shared checklists: `references/` (copied by script — fixes upstream per-skill gap #361)
 
 ## Core rules

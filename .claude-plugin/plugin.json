@@ -1,0 +1,8 @@
+{
+  "name": "sdlc-workflow",
+  "version": "1.0.0",
+  "description": "Reusable SDLC workflow: Jira-to-GitLab autopilot, trunk-based conventions, and review gates for AI coding agents.",
+  "author": {
+    "name": "aniketshukla1"
+  }
+}

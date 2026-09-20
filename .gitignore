@@ -1,5 +1,10 @@
 .cursor/skills/
 .opencode/skills/
+.claude/skills/
+.agents/skills/
+.github/skills/
+.kiro/skills/
+.gemini/skills/
 references/
 tasks/
 docs/specs/SPEC-*.md

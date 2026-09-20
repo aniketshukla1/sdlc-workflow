@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "sdlc-workflow-marketplace",
+  "description": "Reusable SDLC workflow: Jira-to-GitLab autopilot plus trunk conventions and MR gates.",
+  "owner": {
+    "name": "aniketshukla1",
+    "url": "https://github.com/aniketshukla1"
+  },
+  "plugins": [
+    {
+      "name": "sdlc-workflow",
+      "version": "1.0.0",
+      "source": {
+        "source": "github",
+        "repo": "aniketshukla1/sdlc-workflow"
+      },
+      "description": "Jira-to-GitLab autopilot (/autopilot), trunk-based Jira conventions, and hard MR review (/mr-review). Upstream engineering skills install separately from addyosmani/agent-skills.",
+      "homepage": "https://github.com/aniketshukla1/sdlc-workflow",
+      "license": "MIT",
+      "keywords": ["skills", "jira", "gitlab", "sdlc", "autopilot", "review"]
+    }
+  ]
+}

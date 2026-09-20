@@ -34,13 +34,17 @@ fi
 
 install_targets() { # $1 = skill dir name
   local skill="$1"
-  mkdir -p .cursor/skills/"$skill" .opencode/skills/"$skill"
-  cp -r "$CACHE_DIR/skills/$skill/." .cursor/skills/"$skill"/
-  cp -r "$CACHE_DIR/skills/$skill/." .opencode/skills/"$skill"/
+  # Every host that consumes SKILL.md from a checkout directory.
+  # (.codex-plugin + .agents/plugins read ./skills/ in place — no copy needed.
+  # Command Code / skills-CLI discover ./skills/ directly — no copy needed.)
+  for target in .cursor/skills .opencode/skills .claude/skills .agents/skills .github/skills .kiro/skills .gemini/skills; do
+    mkdir -p "$target/$skill"
+    cp -r "$CACHE_DIR/skills/$skill/." "$target/$skill/"
+    mkdir -p "$target/$skill/references"
+    cp -rn "$CACHE_DIR"/references/. "$target/$skill"/references/ 2>/dev/null || true
+  done
   # Fix #361: ensure shared checklists travel with every install
-  mkdir -p .cursor/skills/"$skill"/references .opencode/skills/"$skill"/references references
-  cp -rn "$CACHE_DIR"/references/. .cursor/skills/"$skill"/references/ 2>/dev/null || true
-  cp -rn "$CACHE_DIR"/references/. .opencode/skills/"$skill"/references/ 2>/dev/null || true
+  mkdir -p references
   cp -rn "$CACHE_DIR"/references/. ./references/ 2>/dev/null || true
 }
 
@@ -57,18 +61,19 @@ else
   done
 fi
 
-# Project-local skills (this template's own skills/, e.g. mr-review) → both agents.
+# Project-local skills (this template's own skills/, e.g. mr-review) → every agent.
 if [[ -d "skills" ]]; then
   for d in skills/*/; do
     [[ -f "$d/SKILL.md" ]] || continue
     skill="$(basename "$d")"
-    mkdir -p .cursor/skills/"$skill" .opencode/skills/"$skill"
-    cp -r "$d/." .cursor/skills/"$skill"/
-    cp -r "$d/." .opencode/skills/"$skill"/
+    for target in .cursor/skills .opencode/skills .claude/skills .agents/skills .github/skills .kiro/skills .gemini/skills; do
+      mkdir -p "$target/$skill"
+      cp -r "$d/." "$target/$skill"/
+    done
     echo "✓ local skill: $skill"
   done
 fi
 
-echo "✓ Installed to .cursor/skills/ + .opencode/skills/ (with references/)"
+echo "✓ Installed to .cursor/skills/ + .opencode/skills/ + .claude/skills/ + .agents/skills/ + .github/skills/ + .kiro/skills/ + .gemini/skills/ (with references/)"
 echo "  Verify: ls .cursor/skills | wc -l && ls .opencode/skills | wc -l"
 echo "  Next: copy AGENTS.md + CONSTRAINTS.md.example→CONSTRAINTS.md into your project root."

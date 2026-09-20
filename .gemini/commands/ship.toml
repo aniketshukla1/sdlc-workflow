@@ -1,0 +1,5 @@
+description = "Ship safely — checklist, rollout, rollback"
+
+prompt = """
+Invoke `git-workflow-and-versioning` + `ci-cd-and-automation` + `shipping-and-launch` (+ `documentation-and-adrs`, `observability-and-instrumentation`). Preconditions: local UI passed, branch published, MR green + approved. Verify pre-launch checklist, squash-merge MR, delete branch/worktree, staged rollout (staging → flag-off → 5% canary → 100%), monitor error/latency, file flag cleanup. Suggest Jira `#close` only when monitors green.
+"""

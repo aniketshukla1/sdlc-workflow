@@ -31,14 +31,26 @@ Jira↔GitLab wiring: [`docs/jira-gitlab-integration.md`](docs/jira-gitlab-integ
 
 ```
 .
-├── AGENTS.md                        # Shared router — read by Cursor AND OpenCode
+├── AGENTS.md                        # Shared router — read by every agent
+├── CLAUDE.md / GEMINI.md            # Thin pointers for Claude Code / Gemini CLI
+├── .windsurfrules                   # Thin router for Windsurf
 ├── SDLC.md                          # Phase gates, entry/exit, skill mapping
 ├── CONSTRAINTS.md.example           # Quality bar defaults (copy to CONSTRAINTS.md per project)
+├── skills/                          # This pack's own skills (jira-autopilot, mr-review) — portable core
 ├── .cursor/
 │   ├── rules/                       # Thin routing policies (never full skills)
 │   └── skills/                      # Installed via script (gitignored, synced from upstream)
 ├── .opencode/
-│   └── commands/                    # /spec /plan /build /test /review /ship wrappers
+│   └── commands/                    # /autopilot /spec /plan /build /test /review /mr-review /ship wrappers
+├── .claude/commands/                # Same wrappers for Claude Code ( marketplace: .claude-plugin/ )
+├── .gemini/commands/                # Same wrappers as TOML for Gemini CLI
+├── commands/                        # Same wrappers as TOML for Antigravity (manifest: plugin.json)
+├── .codex-plugin/ + .agents/plugins/# Codex marketplace manifests (Codex reads ./skills/ in place)
+├── .github/
+│   ├── copilot-instructions.md      # Router for GitHub Copilot
+│   └── skills/                      # Installed via script (gitignored)
+├── .kiro/skills/                    # Installed via script (gitignored)
+├── .agents/skills/                  # Generic discovery path (gitignored)
 ├── templates/
 │   ├── adr/
 │   │   └── ADR-template.md            # Architecture Decision Records (copy to docs/adr/NNNN-*.md)
@@ -55,7 +67,7 @@ Jira↔GitLab wiring: [`docs/jira-gitlab-integration.md`](docs/jira-gitlab-integ
 │   │   └── renovate.json.example    # Dependency updates (copy to renovate.json at root)
 │   └── spec/                        # SPEC.md + tasks/plan.md starters (AC-IDs + TDD-first)
 ├── scripts/
-│   ├── install-skills.sh            # One-command skill install for both agents
+│   ├── install-skills.sh            # One-command skill install for every agent (upstream + this pack)
 │   ├── new-issue.sh                 # PROJ-123-summary branch + worktree (LOCAL ONLY, no push)
 │   ├── check-jira-conventions.sh    # Branch/commit/MR lint (also a CI job)
 │   ├── ui-verify.sh                 # Compose up + health wait + URLs (the push gate)
@@ -81,9 +93,13 @@ Jira↔GitLab wiring: [`docs/jira-gitlab-integration.md`](docs/jira-gitlab-integ
 # 1. Copy this template into your repo root (or clone it as starter)
 cp -r /path/to/sdlc-workflow/.cursor /path/to/sdlc-workflow/AGENTS.md /path/to/my-project/
 cp -r /path/to/sdlc-workflow/.opencode /path/to/my-project/
+cp -r /path/to/sdlc-workflow/.claude /path/to/my-project/          # Claude Code commands
+cp -r /path/to/sdlc-workflow/.gemini /path/to/sdlc-workflow/commands /path/to/my-project/  # Gemini / Antigravity
+cp -r /path/to/sdlc-workflow/.codex-plugin /path/to/sdlc-workflow/.agents /path/to/my-project/  # Codex
+cp /path/to/sdlc-workflow/AGENTS.md /path/to/my-project/CLAUDE.md  # or copy thin CLAUDE.md/GEMINI.md
 cp /path/to/sdlc-workflow/CONSTRAINTS.md.example /path/to/my-project/CONSTRAINTS.md
 
-# 2. Install all 25 skills for BOTH agents
+# 2. Install all 25 skills for EVERY agent (plus this pack's jira-autopilot + mr-review)
 ./scripts/install-skills.sh --all
 # Or subset: ./scripts/install-skills.sh --skills spec-driven-development,test-driven-development,code-review-and-quality
 
@@ -92,7 +108,7 @@ cp /path/to/sdlc-workflow/CONSTRAINTS.md.example /path/to/my-project/CONSTRAINTS
 # Copy templates/gitlab/.gitlab-ci.yml.example → .gitlab-ci.yml and adjust image/vars
 # Install pre-commit: cp templates/git-hooks/pre-commit.example .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
-# 4. Run the lifecycle (identical in Cursor and OpenCode)
+# 4. Run the lifecycle (identical in every agent — same gates, native command shape)
 # Fast path (recommended): paste a Jira key OR summary+description → /autopilot drives
 # new-issue → /spec → /plan → /build → /test → ui-verify → publish → GitLab MR in gate order
 /autopilot     # gated: still pauses for spec approval, plan approval, and your browser UI pass
@@ -122,6 +138,29 @@ Truly automated: after plan approval, agents work locally to a browser-testable 
 - **Spec before code; tests before implementation.** Every spec AC has an ID traced to ≥1 failing-first test (`docs/spec-to-tdd-and-coverage.md`). Coverage: backend ≥80% touched + zero new uncovered lines, frontend vitest thresholds, e2e + axe on UI MRs. Mutation: mutmut zero-survived on high-risk backend modules.
 - **Definition of Done** = task acceptance criteria **plus** standing checklist (`references/definition-of-done.md`).
 - **CODEOWNERS:** sensitive paths (auth, migrations, billing, CI) need named human approval — copy `templates/gitlab/CODEOWNERS.example` → `CODEOWNERS` at project root and replace the handles.
+
+## Supported agents
+
+Same workflow (`AGENTS.md` + `skills/`) in every host's native discovery path.
+Upstream engineering skills come from `addyosmani/agent-skills`; this pack adds
+`jira-autopilot` + `mr-review` plus Jira/GitLab lifecycle wrappers.
+
+| Agent | Skills | Commands | Notes |
+|---|---|---|---|
+| Claude Code | `.claude/skills/` (via install script) | `.claude/commands/` + marketplace `.claude-plugin/` | `/plugin marketplace add <this-repo>` |
+| Codex | `./skills/` in place (`.codex-plugin/`) | `@jira-autopilot`, `@mr-review` | `codex plugin marketplace add <this-repo>` (CLI v0.122+) |
+| Cursor | `.cursor/skills/` | `.cursor/rules/` + auto-routing | Never paste full skills into rules |
+| OpenCode | `.opencode/skills/` | `.opencode/commands/` | `skill({name})` routing via `AGENTS.md` |
+| Gemini CLI | `.gemini/skills/`, `.agents/skills/` | `.gemini/commands/*.toml` | `gemini skills install <repo> --path skills` also works |
+| GitHub Copilot | `.github/skills/`, `.agents/skills/` | `.github/copilot-instructions.md`, `.github/agents/` | `npx skills add` supported |
+| Kiro | `.kiro/skills/` | auto-discovered | Follows `AGENTS.md` |
+| Windsurf | via `.windsurfrules` | `commands/*.toml` reference | Keep global rules to 2–3 skills |
+| Antigravity | `./skills/` + `plugin.json` | `commands/*.toml` | `agy plugin install <repo>` |
+| Command Code / skills CLI / others | `./skills/` directly | `AGENTS.md` | `npx/cmd skills add <repo>` — plain Markdown |
+
+`./scripts/install-skills.sh --all` syncs upstream skills + this pack into all
+seven checkout skill dirs (all gitignored — wrappers and manifests are committed).
+Codex, Command Code, and skills-CLI hosts read `./skills/` in place: no copy needed.
 
 ## Upstream
 

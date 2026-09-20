@@ -1,0 +1,5 @@
+description = "Break spec into small verifiable tasks"
+
+prompt = """
+Invoke the `planning-and-task-breakdown` skill. Read `docs/specs/SPEC-<JIRAKEY>.md`; if any success criterion lacks a test mapping, REFUSE and send the spec back (unmapped AC blocks planning). Produce vertical slices (≤5 files / ~100 lines each) where every task is test-first: Tests-first + Red-evidence + acceptance + verify + files. Save `tasks/<JIRAKEY>-plan.md` and `tasks/<JIRAKEY>-todo.md`, propose Jira sub-tasks. No product code — show plan for approval first.
+"""
