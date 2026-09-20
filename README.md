@@ -118,8 +118,15 @@ npx skills add aniketshukla1/sdlc-workflow
 
 # From a checkout — syncs upstream + this pack into all 7 skill dirs:
 ./scripts/install-skills.sh --all
-# Or subset: ./scripts/install-skills.sh --skills spec-driven-development,test-driven-development,code-review-and-quality
+
+# Full workflow installer — skills AND executors, by choice:
+./scripts/install-workflow.sh                          # interactive: global / current project / custom path
+./scripts/install-workflow.sh --scope global --yes     # global skills, then project paths for scripts/templates
+./scripts/install-workflow.sh --scope project --project ~/my-app --yes
 ```
+
+Global installs the skills; each project you name also gets the executors
+(`scripts/`, `templates/`, `AGENTS.md`, routers, commands).
 
 | Agent | Skills | Commands | Notes |
 |---|---|---|---|
