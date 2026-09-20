@@ -111,22 +111,26 @@ flowchart LR
 ## Install (pick your agent)
 
 Upstream engineering skills come from `addyosmani/agent-skills`; this pack adds `jira-autopilot` + `mr-review`.
+Full step-by-step guide (prerequisites, verify, troubleshooting): [`docs/installation.md`](docs/installation.md).
 
-```bash
-# Skills-CLI hosts (70+ agents) — zero setup, verified live:
-npx skills add aniketshukla1/sdlc-workflow
+1. **Skills only, 1 minute** — the two skills in your current agent, nothing else:
+   ```bash
+   npx skills add aniketshukla1/sdlc-workflow
+   ```
+2. **Full workflow (recommended)** — skills *and* executors (`scripts/`, `templates/`, routers).
+   It asks scope (global / current project / custom path), agents, then project paths:
+   ```bash
+   ./scripts/install-workflow.sh
+   # Non-interactive: --scope global|project --project ~/my-app --agents cursor,opencode --yes
+   ```
+3. **Skills sync only** — the 25 upstream skills + this pack into all 7 skill dirs:
+   ```bash
+   ./scripts/install-skills.sh --all
+   # Or subset: ./scripts/install-skills.sh --skills spec-driven-development,test-driven-development,code-review-and-quality
+   ```
 
-# From a checkout — syncs upstream + this pack into all 7 skill dirs:
-./scripts/install-skills.sh --all
-
-# Full workflow installer — skills AND executors, by choice:
-./scripts/install-workflow.sh                          # interactive: global / current project / custom path
-./scripts/install-workflow.sh --scope global --yes     # global skills, then project paths for scripts/templates
-./scripts/install-workflow.sh --scope project --project ~/my-app --yes
-```
-
-Global installs the skills; each project you name also gets the executors
-(`scripts/`, `templates/`, `AGENTS.md`, routers, commands).
+Global installs the skills; each project you name also gets the executors.
+After installing, restart your agent session so it discovers the new skills.
 
 | Agent | Skills | Commands | Notes |
 |---|---|---|---|
