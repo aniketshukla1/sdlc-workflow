@@ -3,6 +3,10 @@
 Source of truth for "what happens when". Each phase lists: **goal, skills, command, Jira state, GitLab action, artifacts, exit gate**. Advance only when the gate is green.
 
 > Orchestrator: `/autopilot` (`jira-autopilot` skill) drives Phases 0→5 end to end for one Jira issue — paste a key or a summary+description, it clarifies, then calls `/spec` → `/plan` → `/build` → `/test` → `ui-verify.sh` → `publish.sh` → MR in gate order with human approvals at spec, plan, and browser-UI pass. `scripts/` are its executors, never standalone shortcuts.
+>
+> Two lanes (decided by the issue, Phase 0b — override always wins):
+> - **Fast lane** — Bug/Task/Sub-task touching ≤2 files, no migration/auth/public-API change, acceptance fits in 2 Jira lines: `/fix` runs clarify → branch → failing-test-first fix → suite green → publish → MR with NO approval pauses (browser pass only if UI touched).
+> - **Full lane** — everything else: the gated flow above. Small fixes must never pay the full toll.
 
 Stack assumptions: FastAPI (`backend/`, `pytest`), React+Tailwind+shadcn (`frontend/`, `vitest`/`playwright`), `docker-compose.yml` for local. Adjust commands in `CONSTRAINTS.md` per repo.
 

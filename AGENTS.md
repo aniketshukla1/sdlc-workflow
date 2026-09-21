@@ -21,7 +21,7 @@ This project uses skills synced from `addyosmani/agent-skills`:
 
 ## Intent → skill mapping
 
-- Jira paste / Jira-to-MR end-to-end / new Jira issue from summary → `jira-autopilot` (`/autopilot`) — orchestrates intake→branch→spec→plan→build→verify→publish→MR; `scripts/` are executors it calls, never replacements.
+- Jira paste / Jira-to-MR end-to-end / new Jira issue from summary → `jira-autopilot` (`/autopilot`) — orchestrates intake→branch→spec→plan→build→verify→publish→MR; `scripts/` are executors it calls, never replacements. Small Bug/Task fix (≤2 files, no migration/auth/API change) → fast lane (`/fix`): test-first fix → suite green → MR, no approval pauses.
 - Vague ask / "what should we build" → `interview-me`, then `idea-refine`
 - New feature / Epic / significant change → `spec-driven-development` + `constraint-driven-development` (`/spec`, `/constraints`)
 - Spec exists, need tasks → `planning-and-task-breakdown` (`/plan`)

@@ -61,6 +61,11 @@ flowchart LR
     style D fill:#e8f5e9,stroke:#2e7d32
 ```
 
+Small Bug/Task fix (≤2 files, no migration/auth/API change)? The **fast lane** skips
+the blue gates entirely: `/fix` runs clarify → branch → failing-test-first fix →
+suite green → publish → MR, no pauses. The agent picks the lane from the issue;
+you can override with `/fix` or by saying so.
+
 ## Lifecycle phase gates
 
 ```mermaid
@@ -170,8 +175,10 @@ cp /path/to/sdlc-workflow/CONSTRAINTS.md.example /path/to/my-project/CONSTRAINTS
 # Copy templates/gitlab/.gitlab-ci.yml.example → .gitlab-ci.yml and adjust image/vars
 # Install pre-commit: cp templates/git-hooks/pre-commit.example .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
-# 3. Paste a Jira key and go — /autopilot drives the whole flow in gate order
-/autopilot     # pauses for spec approval, plan approval, and your browser UI pass
+# 3. Paste a Jira key and go — /autopilot picks the lane by the issue
+/autopilot     # small Bug/Task (≤2 files, no risk) → fast lane: test-first fix → MR, no pauses
+               # anything bigger → full lane: pauses for spec, plan, and browser UI pass
+# Small fix and in a hurry? /fix jumps straight to the fast lane.
 
 # Manual path (same gates, you invoke each step):
 /constraints   # once per project → writes CONSTRAINTS.md
@@ -206,7 +213,7 @@ Truly automated: after plan approval, agents work locally to a browser-testable 
 │   ├── rules/                       # Thin routing policies (never full skills)
 │   └── skills/                      # Installed via script (gitignored, synced from upstream)
 ├── .opencode/
-│   └── commands/                    # /autopilot /spec /plan /build /test /review /mr-review /ship wrappers
+│   └── commands/                    # /autopilot /fix /spec /plan /build /test /review /mr-review /ship wrappers
 ├── .claude/commands/                # Same wrappers for Claude Code (marketplace: .claude-plugin/)
 ├── .gemini/commands/                # Same wrappers as TOML for Gemini CLI
 ├── commands/                        # Same wrappers as TOML for Antigravity (manifest: plugin.json)
