@@ -7,6 +7,6 @@ When the user pastes a Jira key (`PROJ-123`), a Jira summary + description, or a
 
 - Detect Mode A (existing key) vs Mode B (create from summary + description); validate key/type/slug shapes before any network or code.
 - Prefer Jira/GitLab MCP tools; fall back to REST via `JIRA_HOST`/`JIRA_EMAIL`/`JIRA_API_TOKEN` and `GITLAB_HOST`/`GITLAB_TOKEN`. Stop with the export block if creds are missing.
-- Clarify per `docs/clarification-protocol.md` (max 3 per round, assumptions listed) until ~95%.
-- Orchestrate executors in order: `scripts/new-issue.sh` → `/spec` (approval gate) → `/plan` (approval gate) → `/build` (local only) → `/test` + `scripts/ui-verify.sh` (human browser pass = push gate) → `scripts/publish.sh` (first push) → GitLab MR `[KEY][Type]` + Jira label + filled template → Jira `#in-review`.
+- Clarify per `docs/clarification-protocol.md` (max 3 per round, assumptions listed) until ~95%. Capture `intent/INTENT-<KEY>.md` (accept gate) before spec.
+- Orchestrate executors in order: `scripts/new-issue.sh` → `/intent` (accept) → `/spec` (approval gate, skills as constraints, flagged concerns + provenance) → `/plan` (approval gate, plan mode, diff-vs-plan) → `/build` (local only) → `/test` + `scripts/ui-verify.sh` (human browser pass = push gate) → `scripts/publish.sh` (first push) → GitLab MR `[KEY][Type]` + Jira label + filled template → Jira `#in-review`.
 - Never push before the UI pass, never auto-merge or `#close` on merge alone, never emit secrets into specs/Jira/MR.

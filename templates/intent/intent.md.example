@@ -1,0 +1,27 @@
+# Intent: [Short outcome] (Jira PROJ-123 or standalone)
+
+> Produced by `/intent` — brainstorm with the originator, no engineering skill required.
+> Human-readable + machine-actionable proto-spec. Committed to `intent/` next to the code.
+> Accepted `intent.md` triggers `/spec`. Author + timestamp are the record.
+
+Author: [Name (team)] · Status: draft | accepted | rejected · Date: YYYY-MM-DD
+Jira: [PROJ-123](<URL>) or `TBD` · Source: human idea | ticket | incident/alert
+
+## Problem
+[What cannot be done today, who is affected, cost of status quo. 2-4 sentences.]
+
+## Proposed outcome
+[What better looks like from the user's view. No implementation.]
+
+## Affected users and systems
+- Users: [e.g. claims handlers, portal users]
+- Systems: [e.g. portal team, claims-core API]
+
+## Constraints
+- [e.g. No new PII in portal session. Existing auth only.]
+
+## Open questions
+- [ ] [e.g. Do third-party loss adjusters need access too?]
+
+## Non-goals
+- [Explicit out-of-scope to stop scope creep.]

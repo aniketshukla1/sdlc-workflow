@@ -7,7 +7,7 @@ description: Hard pre-merge review of a colleague MR judged against its Jira iss
 
 ## Overview
 
-You are the last line of defense before `main`. A green pipeline is necessary but never sufficient: pipelines don't check Jira coverage, architecture stability, or missing scope. This skill judges the MR against its Jira description acceptance-criteria-by-acceptance-criteria, then runs hard quality gates, then delivers a verdict. Review the diff, never the author.
+You are the last line of defense before `main`. A green pipeline is necessary but never sufficient: pipelines don't check Jira coverage, architecture stability, or missing scope. This skill judges the MR against its Jira description acceptance-criteria-by-acceptance-criteria, then runs hard quality gates, then delivers a verdict. Review the diff, never the author. Policy: `REVIEW.md` (from `templates/review/REVIEW.md.example`) defines passes (Bugs / Security / Compliance vs intent + spec + plan), Important vs Nit, max 5 nits, do-not-report.
 
 ## Inputs (required — STOP and ask if any is missing)
 
@@ -18,9 +18,9 @@ You are the last line of defense before `main`. A green pipeline is necessary bu
 
 ## Phase 0 — Gather (read-only, no opinions yet)
 
-- Full MR diff; is the MR template completely filled (Jira+type, spec section, test evidence, checklist, rollback)?
+- Full MR diff (check diff-vs-`tasks/<KEY>-plan.md`; departures without a `plan.md` update → Required); is the MR template completely filled (Jira+type, spec section, test evidence, checklist, rollback)?
 - Jira description: acceptance criteria list, test plan, rollout/risks, Figma/design reference if any.
-- Linked spec section + plan tasks for this slice.
+- Linked intent (`intent/INTENT-<KEY>.md`) + spec section + plan tasks for this slice.
 - Pipeline: green on every job? Artifacts actually attached (junit, coverage, mutants stats, playwright report, snapshots, LHCI)?
 - CODEOWNERS: required owners assigned, approvals present where matched?
 

@@ -29,6 +29,7 @@
 - Rollback path documented in MR. Feature flags: owner + expiry, cleanup ≤2 weeks, no nesting.
 
 ## Boundaries
-- Always: run tests before commit; validate inputs; link Jira + spec in MR.
+- Always: run tests before commit; validate inputs; link Jira + intent + spec + plan in MR; paste tool output as evidence.
 - Ask first: DB migrations, new deps, CI/CD changes, public API changes.
-- Never: commit secrets; edit vendor/build output; force-push shared branches; refactor untested legacy without characterization tests.
+- Never: commit secrets; edit vendor/build output; force-push shared branches; refactor untested legacy without characterization tests; edit tests during a fix (`FIX_MODE=1` hook) without human approval.
+- Hooks enforce (`templates/claude/hooks/`, `docs/hooks-and-guardrails.md`): protected paths + credentials blocked; prod deploys need `RELEASE_APPROVAL`.

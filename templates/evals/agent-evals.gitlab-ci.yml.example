@@ -1,0 +1,17 @@
+# Agent evals — include in .gitlab-ci.yml (and see .github/workflows/agent-evals.yml.example for GitHub).
+# Runs non-interactively on CLAUDE.md/skills/hooks changes + nightly schedule.
+# Gate config changes on pass rate; each prod incident adds a permanent eval.
+agent-evals:
+  stage: test
+  image: node:20-slim
+  script:
+    - npm install -g @anthropic-ai/claude-code
+    - chmod +x evals/check.sh
+    - |
+      for eval in evals/*.json; do
+        claude -p "$(jq -r '.prompt' $eval)" --allowedTools "Read,Edit,Bash" --output-format json > result.json
+        ./evals/check.sh "$eval" result.json
+      done
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - changes: [CLAUDE.md, .claude/**/*, skills/**/*]

@@ -8,7 +8,15 @@
 references/
 tasks/
 docs/specs/SPEC-*.md
+intent/*.md
+evals/*.json
 !templates/spec/*.example
+!templates/intent/*.example
+!templates/review/*.example
+!templates/claude/*.example
+!templates/agents/*.example
+!templates/evals/*.example
+!templates/maintain/*.example
 __pycache__/
 *.pyc
 *.pyo

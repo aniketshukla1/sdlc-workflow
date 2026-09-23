@@ -1,6 +1,9 @@
 # Plan: PROJ-123 — [Feature]
 
-Spec: `docs/specs/SPEC-PROJ-123.md` · Jira: [PROJ-123](<URL>) · Type: Story · Branch: `PROJ-123-short-summary`
+Spec: `docs/specs/SPEC-PROJ-123.md` · Intent: `intent/INTENT-PROJ-123.md` · Jira: [PROJ-123](<URL>) · Type: Story · Branch: `PROJ-123-short-summary`
+
+## Files that change
+- [e.g. `portal/src/claims/StatusPanel.tsx` (new), `claims-api/routes/status.py`, `claims-api/tests/test_status.py`]
 
 ## Build order + dependencies
 1. [ ] Slice 1 — [description] (no deps)
@@ -8,6 +11,13 @@ Spec: `docs/specs/SPEC-PROJ-123.md` · Jira: [PROJ-123](<URL>) · Type: Story ·
 3. [ ] Slice 3 — [description] (parallelizable with 2)
 
 Risks: [risk → mitigation]
+
+## Proof
+- [e.g. `test_status.py` covers the four claim states; screenshot matches approved mock.]
+
+## Plan discipline
+- Start implementation in plan mode (read-only until plan accepted). Commit this file as `tasks/PROJ-123-plan.md` — PR review checks diff vs plan.
+- When implementation departs from the plan, update `plan.md` in the same commit.
 
 ## Tasks (TDD-first: tests are written BEFORE implementation, red shown BEFORE green)
 - [ ] Task 1: [description] (covers AC-1)

@@ -95,7 +95,7 @@ After merge: `git worktree remove ../<repo>-123` (cleanup), branch auto-deleted 
 
 ## Part 6 — Daily loop (after onboarding)
 
-`new-issue` → `/spec` → `/plan` → `/build` → `/test` → browser → `publish` → `/review` → MR → `/ship`. Your human gates are always the same four: **spec approval, plan approval, browser pass, MR approval.** Full gate reference: `SDLC.md`. Flowchart: `docs/sdlc-flow.mmd`.
+`new-issue` → `/intent` → `/spec` → `/plan` → `/build` → `/test` → browser → `publish` → `/review` → MR → `/ship`. Your human gates are always the same five: **intent accept, spec approval, plan approval, browser pass, MR approval.** Full gate reference: `SDLC.md`. Flowchart: `docs/sdlc-flow.mmd`.
 
 ## Part 7 — Testing rules that apply to everyone
 

@@ -1,25 +1,27 @@
-%% SDLC flow — readable overview (linear, 12 steps)
+%% SDLC flow — readable overview (linear, 13 steps)
 %% Details per step: SDLC.md + docs/*.md
 %% Conventions: branch PROJ-123-short-summary · commit PROJ-123 [Type] type: ... · MR [PROJ-123][Type]
-%% Rule: NOTHING reaches origin before local UI pass (step 8). First push = publish.sh (step 9).
+%% Chain: intent/INTENT-123 → docs/specs/SPEC-123 → tasks/123-plan → diff+tests → MR+REVIEW findings
+%% Rule: NOTHING reaches origin before local UI pass (step 9). First push = publish.sh (step 10).
 %% Render: GitLab / GitHub / VS Code Mermaid preview / https://mermaid.live
 
 flowchart TD
-    A["1 - Intake\nJira issue created"] --> B{"2 - Confident?"}
+    A["0 - Intent accepted\nintent/INTENT-123"] --> A1["1 - Intake\nJira issue created"]
+    A1 --> B{"2 - Confident?"}
     B -- "No" --> C["Ask one question"] --> B
-    B -- "Yes" --> D["3 - SPEC approved"]
-    D --> E["4 - PLAN approved"]
+    B -- "Yes" --> D["3 - SPEC approved\n+ skills + concerns"]
+    D --> E["4 - PLAN approved\nplan mode, diff-vs-plan"]
     E --> F["5 - Branch ready\nPROJ-123-slug, local only"]
     F --> G["6 - Build slices\ntest-driven, local commits"]
     G --> H["7 - Local tests green\nlint + typecheck + unit"]
     H --> I["8 - UI check LOCAL\nbrowser, same branch"]
     I --> J{"UI passes?"}
     J -- "No" --> G
-    J -- "Yes" --> K["9 - Publish\nfirst push to origin"]
-    K --> L{"10 - Pipeline green?"}
+    J -- "Yes" --> K["10 - Publish\nfirst push to origin"]
+    K --> L{"11 - Pipeline green?"}
     L -- "No" --> G
-    L -- "Yes" --> M["11 - Review + MR\nmerge + rollout"]
-    M --> N{"12 - Monitors healthy?"}
+    L -- "Yes" --> M["12 - Review + MR\nREVIEW.md passes"]
+    M --> N{"13 - Monitors healthy?"}
     N -- "No" --> O["Roll back"] --> M
     N -- "Yes" --> P(["Done\nJira closed"])
 

@@ -169,6 +169,8 @@ cp -r /path/to/sdlc-workflow/.claude /path/to/my-project/          # Claude Code
 cp -r /path/to/sdlc-workflow/.gemini /path/to/sdlc-workflow/commands /path/to/my-project/  # Gemini / Antigravity
 cp -r /path/to/sdlc-workflow/.codex-plugin /path/to/sdlc-workflow/.agents /path/to/my-project/  # Codex
 cp /path/to/sdlc-workflow/CONSTRAINTS.md.example /path/to/my-project/CONSTRAINTS.md
+cp /path/to/sdlc-workflow/templates/claude/CLAUDE.md.example /path/to/my-project/CLAUDE.md  # trim to one page
+cp /path/to/sdlc-workflow/templates/review/REVIEW.md.example /path/to/my-project/REVIEW.md  # review policy
 
 # 2. Wire GitLab templates + local hooks (one time per project)
 # GitLab → Settings → Merge Requests → Default MR template, paste templates/gitlab/merge_request_template.md
@@ -177,14 +179,15 @@ cp /path/to/sdlc-workflow/CONSTRAINTS.md.example /path/to/my-project/CONSTRAINTS
 
 # 3. Paste a Jira key and go — /autopilot picks the lane by the issue
 /autopilot     # small Bug/Task (≤2 files, no risk) → fast lane: test-first fix → MR, no pauses
-               # anything bigger → full lane: pauses for spec, plan, and browser UI pass
+               # anything bigger → full lane: pauses for intent, spec, plan, and browser UI pass
 # Small fix and in a hurry? /fix jumps straight to the fast lane.
 
 # Manual path (same gates, you invoke each step):
-/constraints   # once per project → writes CONSTRAINTS.md
+/constraints   # once per project → writes CONSTRAINTS.md (+ CLAUDE.md, REVIEW.md)
+/intent        # per idea → writes intent/INTENT-<KEY>.md, product-owner accept triggers /spec
 ./scripts/new-issue.sh PROJ-123 Story short-summary  # branch PROJ-123-summary + worktree (LOCAL ONLY)
-/spec          # per Jira Epic/Story → writes SPEC-<KEY>.md, link in Jira (asks questions first)
-/plan          # per spec → writes tasks/plan.md + Jira sub-tasks
+/spec          # per accepted intent → writes SPEC-<KEY>.md (skills as constraints, flagged concerns), link in Jira
+/plan          # per spec → writes tasks/plan.md (plan mode, files + proof) + Jira sub-tasks
 /build         # per sub-task on the PROJ-123-summary worktree (or /build auto) — commits stay LOCAL
 /test          # reproduce → fix → guard (local)
 ./scripts/ui-verify.sh  # boot + URLs → you test in browser on SAME branch, NOTHING on origin yet
@@ -213,7 +216,7 @@ Truly automated: after plan approval, agents work locally to a browser-testable 
 │   ├── rules/                       # Thin routing policies (never full skills)
 │   └── skills/                      # Installed via script (gitignored, synced from upstream)
 ├── .opencode/
-│   └── commands/                    # /autopilot /fix /spec /plan /build /test /review /mr-review /ship wrappers
+│   └── commands/                    # /autopilot /fix /intent /spec /plan /build /test /review /mr-review /ship wrappers
 ├── .claude/commands/                # Same wrappers for Claude Code (marketplace: .claude-plugin/)
 ├── .gemini/commands/                # Same wrappers as TOML for Gemini CLI
 ├── commands/                        # Same wrappers as TOML for Antigravity (manifest: plugin.json)
@@ -226,6 +229,12 @@ Truly automated: after plan approval, agents work locally to a browser-testable 
 ├── templates/
 │   ├── adr/                         # Architecture Decision Records (copy to docs/adr/NNNN-*.md)
 │   ├── jira/                        # Story / Bug / Task / Sub-task / Flaky-test bodies
+│   ├── intent/                      # INTENT.md proto-spec (Problem / Outcome / Users / Constraints)
+│   ├── claude/                      # CLAUDE.md starter + settings.json + hooks/ + managed-settings
+│   ├── review/                      # REVIEW.md policy (Bugs / Security / Compliance, Important vs Nit)
+│   ├── agents/                      # verifier / simplifier / researcher subagents (copy to .claude/agents/)
+│   ├── evals/                       # eval.json + check.sh + agent-evals CI job (prompt + checks)
+│   ├── maintain/                    # bands.yaml tiers for breach → intent.md
 │   ├── gitlab/
 │   │   ├── merge_request_template.md
 │   │   └── .gitlab-ci.yml.example   # Stages mapped to skill gates (+ coverage/contract)

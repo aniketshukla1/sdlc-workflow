@@ -1,0 +1,47 @@
+{
+  "$schema": "https://code.claude.com/docs/en/settings",
+  "comment": "Managed settings for regulated enterprises — deployed by platform/IT via MDM or admin console. Engineers cannot edit or override. Customize domains, paths, and versions to your environment.",
+  "permissions": {
+    "deny": [
+      "Read(.env*)",
+      "Read(./secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/credentials)",
+      "WebFetch",
+      "Bash(curl *)",
+      "Bash(wget *)"
+    ],
+    "allow": [
+      "Bash(git *)",
+      "Bash(docker compose *)",
+      "Bash(pytest *)",
+      "Bash(ruff *)",
+      "Bash(mypy *)",
+      "Bash(npm run *)"
+    ],
+    "disableBypassPermissionsMode": "disable"
+  },
+  "allowManagedPermissionRulesOnly": true,
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": ["gitlab.com", "registry.npmjs.org", "pypi.org"]
+    },
+    "credentials": {
+      "files": [
+        { "path": "~/.ssh", "mode": "deny" },
+        { "path": "~/.aws/credentials", "mode": "deny" }
+      ],
+      "envVars": [{ "name": "GITLAB_TOKEN", "mode": "deny" }]
+    }
+  },
+  "allowManagedHooksOnly": true,
+  "disableSideloadFlags": true,
+  "allowManagedMcpServersOnly": true,
+  "strictKnownMarketplaces": [
+    { "source": "github", "repo": "aniketshukla1/sdlc-workflow" }
+  ],
+  "requiredMinimumVersion": "2.1.193"
+}

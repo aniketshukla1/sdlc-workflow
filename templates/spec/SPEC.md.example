@@ -1,6 +1,7 @@
 # Spec: [Feature] (Jira PROJ-123)
 
 > Produced by `/spec` (`spec-driven-development`). Human-approved before `/plan`. Keep living — update on scope/decision change. Delete or archive after merge if repo doesn't keep specs long-term.
+> Source intent: `intent/INTENT-PROJ-123.md` (accepted) · Skills applied: [names + versions] · Prompt: see Provenance below.
 
 ## Objective
 [What + why. Users, user stories, success metrics.]
@@ -55,3 +56,11 @@ tests/e2e       → playwright specs
 
 ## Open Questions
 - [ ] ...
+
+## Flagged concerns (policy conflicts / risks for owner sign-off)
+- [ ] [Concern + owning policy/skill + owner + resolution]
+
+## Provenance
+- Intent SHA: [commit SHA of `intent/INTENT-PROJ-123.md`]
+- Skills: [e.g. secure-api-review@<sha>, ux-standards@<sha>]
+- Prompt version: [slash-command sha or pasted prompt hash]

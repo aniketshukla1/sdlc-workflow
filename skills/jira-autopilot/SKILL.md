@@ -13,8 +13,9 @@ The user pastes either (A) an existing Jira key or (B) a summary plus
 description, and you drive everything to an open GitLab MR. Phase 0b
 picks the lane by the issue: small Bug/Task fixes take the **fast lane**
 (clarify → branch → test-first fix → suite green → MR, no approval
-pauses); everything else takes the **full lane** (spec ⏸ → plan ⏸ →
+pauses); everything else takes the **full lane** (intent → spec ⏸ → plan ⏸ →
 build → UI pass ⏸ → MR). Automation removes copy-paste, never judgment.
+Committed chain: `intent/INTENT-<KEY>.md` → `docs/specs/SPEC-<KEY>.md` → `tasks/<KEY>-plan.md` → diff + tests → MR + `REVIEW.md` findings.
 
 Input contract (accept any of these, nothing else is required to start):
 
@@ -56,12 +57,12 @@ with a one-line reason — the user can override, and override always wins.
 **Full lane** otherwise — spec doc, plan doc, both approval gates.
 
 Lane behavior:
-- Fast: skip Phase 5 (spec doc) and Phase 6 (plan doc) entirely — the
+- Fast: skip Phase 4b (intent doc), Phase 5 (spec doc) and Phase 6 (plan doc) entirely — the
   2-line Jira acceptance IS the spec. No approval pauses anywhere; run
   clarify → branch → test-first fix → suite green → publish → MR straight
   through. Only STOP on ambiguity you genuinely cannot resolve or a
   lane violation discovered mid-fix (then say so and switch to full lane).
-- Full: unchanged — `/spec` ⏸ approval → `/plan` ⏸ approval → build →
+- Full: unchanged — `/intent` (accept) → `/spec` ⏸ approval → `/plan` ⏸ approval (plan mode) → build →
   UI pass ⏸ → publish → MR.
 
 ## Phase 1 — Connect (MCP first, tokens as fallback)
@@ -122,10 +123,10 @@ ASSUMPTIONS I'M MAKING:
 → Correct me now or I'll proceed with these after your answers.
 ```
 
-3. Record answers in `docs/specs/SPEC-<KEY>.md` (Open Questions, full
+3. Record answers in `intent/INTENT-<KEY>.md` + `docs/specs/SPEC-<KEY>.md` (Open Questions, full
    lane) or the Jira comment (fast lane), and, when connected, as a Jira
    comment. No open high-risk question survives into Build. Vague ask →
-   `interview-me` → `idea-refine` before any spec work. Fast lane: skip
+   `/intent` → `interview-me` → `idea-refine` before any spec work. Fast lane: skip
    questions the fix itself answers (repro + failing test are the proof).
 
 ## Phase 4 — Branch and worktree (executor, local only)
@@ -141,28 +142,42 @@ Rules: branch `<KEY>-<slug>` off `main` (key first, no `feat/` prefix,
 ≤60 chars), one issue = one branch = one worktree = one MR.
 Nothing is pushed here — first push happens only in Phase 8.
 
+## Phase 4b — Intent gate (`/intent`, product-owner accept) — FULL LANE ONLY
+
+Skip entirely on the fast lane.
+
+Brainstorm with the originator and write `intent/INTENT-<KEY>.md` from
+`templates/intent/intent.md.example` (Problem / Proposed outcome /
+Affected users and systems / Constraints / Open questions / Non-goals +
+Author, Status, Date, Jira link). Originator corrects misunderstandings.
+**STOP for intent accept.** Commit to `intent/` — accepted intent triggers `/spec`.
+
 ## Phase 5 — Spec gate (`/spec`, human approval) — FULL LANE ONLY
 
 Skip entirely on the fast lane (the 2-line Jira acceptance IS the spec).
 
 Invoke `spec-driven-development` (+ `constraint-driven-development` if
-`CONSTRAINTS.md` is missing). Read the Jira issue + `CONSTRAINTS.md`,
-write `docs/specs/SPEC-<KEY>.md` (6 areas + threat-model section for
-auth/data/payment/public-API work, measurable criteria, every criterion
-with an AC-ID in an Acceptance → Test map — unmapped AC blocks
-planning). **STOP for human spec approval.** Link the spec file in a
+`CONSTRAINTS.md` is missing). Read the accepted `intent/INTENT-<KEY>.md` +
+Jira issue + `CONSTRAINTS.md`, apply org skills (brand, security,
+compliance, UX) as constraints, write `docs/specs/SPEC-<KEY>.md` (6 areas +
+threat-model section for auth/data/payment/public-API work, measurable
+criteria, every criterion with an AC-ID in an Acceptance → Test map —
+unmapped AC blocks planning, Flagged concerns for policy-owner sign-off,
+Provenance with intent SHA + skill versions + prompt). **STOP for human spec approval.** Link intent + spec files in a
 Jira comment.
 
-## Phase 6 — Plan gate (`/plan`, human approval) — FULL LANE ONLY
+## Phase 6 — Plan gate (`/plan`, human approval, plan mode) — FULL LANE ONLY
 
 Skip entirely on the fast lane (one fix = one task, no plan doc).
 
 Invoke `planning-and-task-breakdown` (contract-first via
-`api-and-interface-design` at new/legacy seams). Refuse planning if any
+`api-and-interface-design` at new/legacy seams) starting in plan mode
+(read-only until accepted). Refuse planning if any
 AC lacks a test mapping. Produce vertical slices (≤5 files / ~100 lines
 each, test-first: Tests-first + Red-evidence + acceptance + verify +
-files) as `tasks/<KEY>-plan.md` + `tasks/<KEY>-todo.md`, propose Jira
-sub-tasks. **STOP for human plan approval.** No product code yet.
+files, plus files-that-change + order + risks + proof) as `tasks/<KEY>-plan.md` + `tasks/<KEY>-todo.md`, propose Jira
+sub-tasks. **STOP for human plan approval.** Commit approved `plan.md` — review
+checks diff-vs-plan; departures update `plan.md` in the same commit. No product code yet.
 
 ## Phase 7 — Build (`/build` or `/fix`, local only)
 
@@ -238,11 +253,11 @@ Before reporting the MR, confirm:
 - [ ] Mode + key + type + **lane** stated back with one-line reason;
       Jira fetched or created with URL recorded
 - [ ] Clarifications asked only for genuine ambiguity (≤3/round,
-      assumptions listed), answers recorded in spec (full) or Jira (fast)
+      assumptions listed), answers recorded in intent + spec (full) or Jira (fast)
 - [ ] Branch `<KEY>-<slug>` via `new-issue.sh`, commits match
       `KEY [Type] <type>:` and key matches branch
-- [ ] Full lane: spec approved (AC-IDs fully test-mapped), plan approved
-      (slices ≤100 lines, red-evidence per task). Fast lane: skipped by
+- [ ] Full lane: intent accepted + spec approved (AC-IDs fully test-mapped + concerns resolved + Provenance) + plan approved
+      (slices ≤100 lines, red-evidence per task, plan-mode). Fast lane: skipped by
       design, 2-line Jira acceptance on record
 - [ ] Local suite + lint + typecheck green with red evidence shown;
       full lane: human browser pass recorded; fast lane: browser pass

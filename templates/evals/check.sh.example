@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Eval check — prompt + checks that define acceptable (tests pass, lint clean, behavior unchanged, policy followed).
+# Usage: ./evals/check.sh evals/<name>.json result.json
+set -euo pipefail
+EVAL="$1"; RESULT="$2"
+echo "eval: $EVAL"
+jq -r '.checks | to_entries[] | "\(.key): \(.value)"' "$EVAL"
+# Runner executes .checks commands non-interactively (see agent-evals job); non-zero = fail.
+# Each production incident gets an eval here and stays as a regression test.
+cat "$RESULT" >/dev/null
+echo "check wired — extend with project-specific assertions."

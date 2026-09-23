@@ -1,0 +1,9 @@
+{
+  "id": "auth-rate-limit",
+  "prompt": "Add rate limiting (50 rps) to POST /login with a test in backend/tests/test_login.py. Follow CLAUDE.md conventions.",
+  "checks": {
+    "tests_pass": "pytest backend/tests/test_login.py -q",
+    "lint_clean": "ruff check backend/",
+    "policy": "no PII in logs; gateway JWT required except /healthz"
+  }
+}

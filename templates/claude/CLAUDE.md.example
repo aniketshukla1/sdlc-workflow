@@ -1,0 +1,27 @@
+# [Service name] (CLAUDE.md — copy to repo root, keep under one page)
+
+> Generated via `/init`, trimmed to what a new joiner needs on day one.
+> Shared by every session. Changes reviewed like code (CODEOWNERS).
+> Rule: when Claude makes the same mistake twice, the correction goes here.
+
+## Commands
+- Build: `docker compose up --build` (healthy: `Build succeeded`)
+- Test: `pytest -q` backend, `cd frontend && npm run test` frontend (healthy: all green)
+- Lint: `ruff check .` + `mypy backend/` / `npm run lint` + `npx tsc --noEmit` (healthy: zero warnings)
+
+## Conventions
+- [e.g. Python 3.12, Pydantic v2. Money is BigDecimal, never float.]
+- [e.g. No new Lombok / no dependency bumps without platform sign-off.]
+
+## Architecture
+- `backend/` routers → services → models; `frontend/` components → hooks → lib
+- [Schemas, events, generated dirs, frozen legacy paths — never edit generated.]
+
+## Things Claude gets wrong
+- [e.g. Do not edit `v1/` legacy package; changes go in `v2/`.]
+- [e.g. Every endpoint needs an integration test.]
+
+## Verifying your work
+- Run tests before reporting any task complete, paste the output.
+- If a test fails, fix the code, not the test.
+- Never skip or delete a failing test without human approval.
