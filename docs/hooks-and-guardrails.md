@@ -42,3 +42,22 @@ A block must explain itself + the route to approval.
 
 Metrics: policy-change → skill-merge time (skill PR); PR findings citing the policy → 0;
 hook wait per gate (OTel allow/block timestamps); violations reaching prod before/after.
+
+## Cursor
+
+Two ways to run the same guardrails (hook scripts parse both Claude and Cursor payloads; exit 2 blocks in both):
+
+- **Option A — zero-config (recommended for Cursor-first teams).** Enable third-party
+  Plugins/Skills in Cursor Settings → Rules, Skills, Subagents. Cursor auto-loads
+  `.claude/settings.json` (PreToolUse→preToolUse, PostToolUse→postToolUse, exit 2 = deny).
+  No extra files; the mapping is in [Cursor's third-party hooks docs](https://cursor.com/docs/reference/third-party-hooks).
+- **Option B — native.** Copy `templates/cursor/hooks.json.example` → `.cursor/hooks.json`
+  and `templates/claude/hooks/*.sh` → `.claude/hooks/` (`chmod +x`). Project hooks run from
+  the repo root; Cursor watches the file and reloads automatically. Security hooks
+  (`beforeReadFile`, prod gate) use `failClosed: true` so crashes/timeouts block instead
+  of failing open. Router: `.cursor/rules/cursor-hooks.mdc`.
+
+Cloud agents pick up `.cursor/hooks.json` from the repo automatically
+(`beforeShellExecution`, `beforeReadFile`, `afterFileEdit`, `preToolUse` all supported;
+`beforeMCPExecution` and Tab hooks are not — see Cursor cloud-agent docs). Team/Enterprise
+hooks come from the dashboard on Enterprise plans.

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/cursor-hooks@latest/schema/hooks.schema.json",
+  "version": 1,
+  "comment": "Cursor project hooks — copy to .cursor/hooks.json. Runs from project root; cloud agents pick it up automatically. Scripts are shared with Claude (.claude/settings.json) via dual-schema stdin parsing; exit 2 blocks in both hosts.",
+  "hooks": {
+    "beforeReadFile": [
+      { "command": ".claude/hooks/protect-paths.sh", "failClosed": true },
+      { "command": ".claude/hooks/no-credentials.sh", "failClosed": true }
+    ],
+    "afterFileEdit": [
+      { "command": ".claude/hooks/lint-after-edit.sh" }
+    ],
+    "preToolUse": [
+      { "command": ".claude/hooks/no-test-edit-during-fix.sh", "matcher": "Write" }
+    ],
+    "beforeShellExecution": [
+      { "command": ".claude/hooks/production-gate.sh", "matcher": "deploy|kubectl|helm", "failClosed": true }
+    ]
+  }
+}

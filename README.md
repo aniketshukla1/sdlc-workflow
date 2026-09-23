@@ -148,7 +148,7 @@ After installing, restart your agent session so it discovers the new skills.
 |---|---|---|---|
 | Claude Code | `.claude/skills/` (via install script) | `.claude/commands/` + marketplace `.claude-plugin/` | `/plugin marketplace add aniketshukla1/sdlc-workflow` |
 | Codex | `./skills/` in place (`.codex-plugin/`) | `@jira-autopilot`, `@mr-review` | `codex plugin marketplace add aniketshukla1/sdlc-workflow` (CLI v0.122+) |
-| Cursor | `.cursor/skills/` | `.cursor/rules/` + auto-routing | Never paste full skills into rules |
+| Cursor | `.cursor/skills/` | `.cursor/rules/` + auto-routing | Hooks: copy `templates/cursor/hooks.json.example` → `.cursor/hooks.json` (or enable third-party to reuse `.claude/settings.json`); headless: `agent -p` via `AGENTS.md`/`AGENT_BIN=agent` (docs/cicd-integration.md) |
 | OpenCode | `.opencode/skills/` | `.opencode/commands/` | `skill({name})` routing via `AGENTS.md` |
 | Gemini CLI | `.gemini/skills/`, `.agents/skills/` | `.gemini/commands/*.toml` | `gemini skills install aniketshukla1/sdlc-workflow --path skills` |
 | GitHub Copilot | `.github/skills/`, `.agents/skills/` | `.github/copilot-instructions.md` | `npx skills add` supported |
@@ -176,6 +176,8 @@ cp /path/to/sdlc-workflow/templates/review/REVIEW.md.example /path/to/my-project
 # GitLab → Settings → Merge Requests → Default MR template, paste templates/gitlab/merge_request_template.md
 # Copy templates/gitlab/.gitlab-ci.yml.example → .gitlab-ci.yml and adjust image/vars
 # Install pre-commit: cp templates/git-hooks/pre-commit.example .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Cursor hooks: cp templates/cursor/hooks.json.example .cursor/hooks.json && cp templates/claude/hooks/*.sh .claude/hooks/ && chmod +x .claude/hooks/*.sh
+# (or enable third-party Plugins/Skills in Cursor Settings and reuse .claude/settings.json with zero config)
 
 # 3. Paste a Jira key and go — /autopilot picks the lane by the issue
 /autopilot     # small Bug/Task (≤2 files, no risk) → fast lane: test-first fix → MR, no pauses
@@ -233,6 +235,7 @@ Truly automated: after plan approval, agents work locally to a browser-testable 
 │   ├── claude/                      # CLAUDE.md starter + settings.json + hooks/ + managed-settings
 │   ├── review/                      # REVIEW.md policy (Bugs / Security / Compliance, Important vs Nit)
 │   ├── agents/                      # verifier / simplifier / researcher subagents (copy to .claude/agents/)
+│   ├── cursor/                      # hooks.json for Cursor (copy to .cursor/hooks.json)
 │   ├── evals/                       # eval.json + check.sh + agent-evals CI job (prompt + checks)
 │   ├── maintain/                    # bands.yaml tiers for breach → intent.md
 │   ├── gitlab/

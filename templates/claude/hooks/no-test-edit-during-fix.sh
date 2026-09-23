@@ -3,7 +3,7 @@
 # Set FIX_MODE=1 when running /fix or a bug-fix slice. Hook blocks test edits in that mode.
 # Alternative: check the diff in review and reject any test change without a flaky-Jira link.
 set -euo pipefail
-FILE="$(jq -r '.tool_input.file_path // .tool_input.path // empty' < /dev/stdin || true)"
+FILE="$(jq -r '.tool_input.file_path // .tool_input.path // .tool_input.file // .file_path // .path // empty' < /dev/stdin || true)"
 if [ "${FIX_MODE:-0}" = "1" ]; then
   case "$FILE" in
     *test_*.py|*tests/*|*.test.ts*|*.spec.ts|*e2e/*)

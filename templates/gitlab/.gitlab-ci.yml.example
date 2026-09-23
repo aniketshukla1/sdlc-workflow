@@ -3,11 +3,12 @@
 # Coverage + contract gates: backend --cov-fail-under=80, frontend vitest --coverage thresholds,
 # openapi.json snapshot attached for contract review. Trunk-based: every branch runs full pipeline.
 
-stages: [conventions, lint, typecheck, test, build, e2e, audit, deploy]
+stages: [conventions, lint, typecheck, test, assist, build, e2e, audit, deploy]
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   DOCKER_HOST: tcp://docker:2375/
+  AGENT_BIN: "claude" # headless agent for assist jobs: "claude" (claude -p) or "agent" (Cursor headless, see docs/cicd-integration.md)
 
 cache:
   paths: [.cache/pip, frontend/node_modules/]
@@ -147,3 +148,58 @@ deploy-staging: # extend to review/canary per shipping-and-launch; keep flag-gat
   script: [echo "deploy $CI_COMMIT_SHA to staging (add your helm/k8s/compose deploy here)"]
   environment: {name: staging}
   rules: [{if: $CI_COMMIT_BRANCH == "main"}]
+
+# --- Assist stage: agents inside the pipeline, inside gates (see docs/cicd-integration.md) ---
+# Principle: the agent may act up to the production gate and cannot pass it.
+# AGENT_BIN=claude uses `claude -p` (ANTHROPIC_API_KEY); AGENT_BIN=agent uses Cursor
+# headless (install via https://cursor.com/install, authenticate per Cursor headless docs).
+
+.agent-base:
+  stage: assist
+  image: node:20-slim
+  before_script:
+    - |
+      if [ "${AGENT_BIN:-claude}" = "agent" ]; then
+        curl https://cursor.com/install -fsS | bash
+        export PATH="$HOME/.local/bin:$PATH"
+      else
+        npm install -g @anthropic-ai/claude-code
+      fi
+
+agent-evals: # stage-gate QA that keeps up with agents (see docs/continuous-evals.md)
+  extends: .agent-base
+  script:
+    - chmod +x evals/check.sh
+    - |
+      for eval in evals/*.json; do
+        $AGENT_BIN -p "$(jq -r '.prompt' $eval)" --output-format text > result.txt
+        ./evals/check.sh "$eval" result.txt
+      done
+  artifacts: {when: always, paths: [result.txt]}
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - changes: [CLAUDE.md, AGENTS.md, .claude/**/*, .cursor/**/*, skills/**/*, evals/**/*]
+
+agent-triage: # read-only judgment on failure — safe to run, never blocks (see scripts/triage-failure.sh)
+  extends: .agent-base
+  when: on_failure
+  allow_failure: true
+  script:
+    - find . -name 'junit*.xml' | head -n 5 | xargs grep -h -A 3 '<failure\|<error' > failures.txt 2>/dev/null || echo "no junit artifacts" > failures.txt
+    - bash scripts/triage-failure.sh failures.txt || true
+  artifacts: {when: always, paths: [triage.md, failures.txt]}
+
+agent-review: # identical passes for every MR; findings advise, humans approve (see docs/pr-review-loop.md)
+  extends: .agent-base
+  rules: [{if: $CI_MERGE_REQUEST_IID}]
+  allow_failure: true # findings never approve/block alone — branch protection requires a code owner
+  script:
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=50
+    - git diff "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME...HEAD" > diff.txt; wc -c diff.txt
+    - |
+      { echo "Review this MR diff against REVIEW.md passes (Bugs / Security / Compliance vs intent+spec+plan).";
+        echo "Repo context: REVIEW.md, intent/, docs/specs/, tasks/. Cap at 5 nits.";
+        echo "Verdict: exactly one of Approve / Request changes / Comment, with covered/missing AC counts + risk rating."; } > review-prompt.txt
+    - $AGENT_BIN -p "$(cat review-prompt.txt) Diff: $(head -c 40000 diff.txt)" --output-format text > review.md
+    - test -n "${GITLAB_TOKEN:-}" && curl -sf -X POST -H "PRIVATE-TOKEN: $GITLAB_TOKEN" --data-urlencode "body=$(head -c 8000 review.md)" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes" || echo "(no GITLAB_TOKEN — review.md attached as artifact only)"
+  artifacts: {when: always, paths: [review.md, diff.txt]}

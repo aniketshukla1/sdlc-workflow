@@ -1,17 +1,25 @@
-# Agent evals — include in .gitlab-ci.yml (and see .github/workflows/agent-evals.yml.example for GitHub).
+# Agent evals — the same job is folded into templates/gitlab/.gitlab-ci.yml.example
+# (assist stage). This standalone file is for projects that include it separately.
+# Agent-agnostic via $AGENT_BIN: "claude" (default) or "agent" (Cursor headless).
 # Runs non-interactively on CLAUDE.md/skills/hooks changes + nightly schedule.
 # Gate config changes on pass rate; each prod incident adds a permanent eval.
 agent-evals:
   stage: test
   image: node:20-slim
   script:
-    - npm install -g @anthropic-ai/claude-code
+    - |
+      if [ "${AGENT_BIN:-claude}" = "agent" ]; then
+        curl https://cursor.com/install -fsS | bash
+        export PATH="$HOME/.local/bin:$PATH"
+      else
+        npm install -g @anthropic-ai/claude-code
+      fi
     - chmod +x evals/check.sh
     - |
       for eval in evals/*.json; do
-        claude -p "$(jq -r '.prompt' $eval)" --allowedTools "Read,Edit,Bash" --output-format json > result.json
-        ./evals/check.sh "$eval" result.json
+        $AGENT_BIN -p "$(jq -r '.prompt' $eval)" --output-format text > result.txt
+        ./evals/check.sh "$eval" result.txt
       done
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
-    - changes: [CLAUDE.md, .claude/**/*, skills/**/*]
+    - changes: [CLAUDE.md, AGENTS.md, .claude/**/*, .cursor/**/*, skills/**/*]

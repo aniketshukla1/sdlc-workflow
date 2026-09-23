@@ -3,7 +3,7 @@
 # The agent prepares the release; a named release manager authorizes it via $RELEASE_APPROVAL.
 # Approval prompts belong here (Deploy), never in Build — Build hooks must not wait on humans.
 set -euo pipefail
-CMD="$(jq -r '.tool_input.command // empty' < /dev/stdin || true)"
+CMD="$(jq -r '.tool_input.command // .command // empty' < /dev/stdin || true)"
 if echo "$CMD" | grep -qiE 'deploy.*prod|prod.*deploy|kubectl.*prod|helm.*prod'; then
   if [ -z "${RELEASE_APPROVAL:-}" ]; then
     echo "BLOCKED: production deploys need a release authorization (RELEASE_APPROVAL)." >&2

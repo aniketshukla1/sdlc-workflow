@@ -14,6 +14,7 @@ evals/*.json
 !templates/intent/*.example
 !templates/review/*.example
 !templates/claude/*.example
+!templates/cursor/*.example
 !templates/agents/*.example
 !templates/evals/*.example
 !templates/maintain/*.example

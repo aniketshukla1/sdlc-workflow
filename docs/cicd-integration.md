@@ -13,3 +13,21 @@ Principle: the agent may act up to the production gate and cannot pass it.
    The closing loop (`docs/closing-the-loop.md`) calls it on a 3σ breach, so prove it in advance.
 
 Metrics: share of failures triaged without paging; DORA (CI + deploy tooling already emit).
+
+## Assist jobs (GitLab example)
+
+`templates/gitlab/.gitlab-ci.yml.example` has an `assist` stage (runs after `test`, skipped
+when irrelevant so green pipelines don't wait):
+
+| Job | When | What |
+|---|---|---|
+| `agent-evals` | Schedule + `CLAUDE.md`/skills/hooks changes | Runs `evals/*.json` via `$AGENT_BIN -p`; hard fail gates config changes |
+| `agent-triage` | Pipeline failure (`when: on_failure`, `allow_failure`) | Greps junit failures → `scripts/triage-failure.sh` → `triage.md` artifact |
+| `agent-review` | MRs (`allow_failure`) | Diff (capped 40k) + `REVIEW.md` passes → `review.md`; posts an MR note only if `GITLAB_TOKEN` is set |
+
+## Picking the agent (`AGENT_BIN`)
+
+- `AGENT_BIN=claude` (default): installs `@anthropic-ai/claude-code`, `claude -p "…" --output-format text`, auth via `ANTHROPIC_API_KEY`.
+- `AGENT_BIN=agent` (Cursor): installs via `https://cursor.com/install`, `agent -p "…" --output-format text`
+  (text/json/stream-json supported), authenticate per [Cursor headless docs](https://cursor.com/docs/cli/headless).
+  Same modes as the editor; Plan mode available headless for spec/plan passes.

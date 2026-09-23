@@ -1,0 +1,10 @@
+---
+description: Cursor hooks router (guardrails, not scripts)
+alwaysApply: false
+---
+
+When the task involves hooks, guardrails, or approval gates, read `docs/hooks-and-guardrails.md` then apply:
+
+- Zero-config: enable third-party Plugins/Skills in Cursor Settings → Rules, Skills, Subagents — `.claude/settings.json` hooks auto-load (PreToolUse→preToolUse mapping, exit 2 blocks).
+- Native: copy `templates/cursor/hooks.json.example` → `.cursor/hooks.json` and `templates/claude/hooks/*.sh` → `.claude/hooks/` (`chmod +x`). Project hooks run from the repo root; cloud agents pick up `.cursor/hooks.json` automatically. Security hooks use `failClosed: true`.
+- Never add human-approval prompts to Build hooks; gates (`production-gate.sh`, `RELEASE_APPROVAL`) live in Deploy.

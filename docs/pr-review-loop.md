@@ -22,3 +22,13 @@ Engineers judge intent + risk; identical review passes cover the rest.
 
 Metrics: time to first review → minutes; share resolved without a human touching the branch;
 defects caught pre-merge vs escaped to prod.
+
+## Cursor path
+
+- **CI (recommended):** the `agent-review` job in `templates/gitlab/.gitlab-ci.yml.example`
+  runs the same passes headlessly (`AGENT_BIN=agent` for Cursor) and attaches `review.md`
+  (+ MR note when `GITLAB_TOKEN` is set). Address findings in Cursor; the PR thread records both.
+- **Editor/cloud:** Cursor's own Agent Review and cloud agents as the interactive alternative —
+  project hooks (`.cursor/hooks.json`) apply there too.
+- Feed findings back into router memory (`AGENTS.md` / Cursor rules): a mistake flagged twice
+  gets its correction there; review also flags when a change made the memory stale. Tune monthly.
